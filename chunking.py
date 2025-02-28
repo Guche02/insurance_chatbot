@@ -1,8 +1,8 @@
+from langchain_community.embeddings import HuggingFaceEmbeddings # type: ignore
+from langchain_experimental.text_splitter import SemanticChunker   # type: ignore
 import pandas as pd
-import PyPDF2
+import PyPDF2    # type: ignore
 from pandas import DataFrame
-
-
 
 def split_qna():
     
@@ -10,14 +10,10 @@ def split_qna():
     
     df = pd.read_csv("./data/Ticket Bot Issues and Answers from Office_Knowledge_Base.csv")
     
-    #drop rows with null values
     df.dropna()
-    #chunk list
     chunks = []
     for index, row in df.iterrows():    
-        #format
         formatted_entry = f"Question: {row['Question/Issue']} Answer: {row['Answer/Solution']}" 
-        #append
         chunks.append(formatted_entry)
     return chunks
             
@@ -36,7 +32,6 @@ def split_conversations():
     current_issue = ""
     
     for index, line in enumerate(lines, start=1):
-        #in the data issues/question are prefixed with these two strings
         if "Issue:" in line or "User:" in line:
             if current_issue:
                 chunks.append(current_issue) 
@@ -51,14 +46,9 @@ def split_conversations():
     
     return chunks
 
-   
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_experimental.text_splitter import SemanticChunker
 
-#embedding for semantic splitter
 hf_embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-#define semantic chunker
 text_splitter = SemanticChunker(
     hf_embeddings, breakpoint_threshold_type="standard_deviation",
 )
