@@ -2,10 +2,11 @@ data/
 
 env/
 
-__pychache__/
+__pycache__/
 __init__
 
 vectordb/
 
 .env
 
+practice/
