@@ -47,4 +47,27 @@ def get_validation_prompt(response: str, query: str) -> str:
     print(f"Formatted Prompt: {formatted_prompt}")
     return prompt_template.format(response=response, query=query)
 
-    
+def get_summarize_prompt(data):
+
+    """Takes in conversation history data and returns a formatted prompt."""
+
+    prompt_template = PromptTemplate(
+        input_variables=["data"],
+        template="""
+        You are an AI assistant that **summarizes** the given **conversation data**.
+        Optimize the summary so that it provides sufficient context for an LLM about the chat history.
+        Limit the summary to 1000 characters to ensure it is concise and informative.
+        If **Conversation Data** is **Empty** return "History Empty".
+
+        **Conversation Data:**
+        {data}
+        """
+    )
+
+    # Ensuring we are correctly formatting the prompt with the 'data' variable.
+    formatted_prompt = prompt_template.format(data=data)
+    # print(f"Formatted Prompt: {formatted_prompt}")
+
+    return formatted_prompt
+
+
