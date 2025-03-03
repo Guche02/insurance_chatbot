@@ -1,25 +1,46 @@
 from langchain.prompts import PromptTemplate  # type: ignore
 
-def get_prompt(contexts: str, query: str) -> str:
+
+def get_prompt(contexts: str, history: str, latest_chat: str, query: str) -> str:
+    """
+    The function returns formatted prompt to get answer to the user query.
+    :param contexts: str
+    :param history: str
+    :param latest_chat: str
+    :param query: str
+    :return: str
+    """
+
     prompt_template = PromptTemplate(
-        input_variables=["query", "contexts"],
-        template=
-        """"
-    You are an insurance assistant. Answer based on the given sample responses and knowledge.).  
+        input_variables=["contexts", "history", "latest_chat", "query"],
+        template="""
+        You are an expert in an insurance system, providing **detailed and accurate** answers based on the available information.
 
-   - If the context exactly matches the question, provide a precise answer.  
-   - If the context is too specific, give a general answer.  
+        Follow these guidelines:
+        - Use the **Context** as the primary reference while ensuring no repetition.
+        - Consider the **History Summary** to maintain continuity and avoid redundant responses.
+        - Incorporate relevant details from the **Latest Chat** for real-time awareness.
+        - Answer only based on the provided **Context, History Summary, and Latest Chat**. Do not use external knowledge.
+        - If the **Context** already answers the question, do not repeat the information.
+        - If the **Context, History Summary, and Latest Chat** do not provide sufficient details, respond only with: **"I don't have that information."**
 
-    **Knowledge**  
-    {contexts}  
+        **Context (Reference Material):**
+        {contexts}
 
-    **User Question:**  
-    {query}  
-       """
+        **History Summary (Past Conversations Overview):**
+        {history}
+
+        **Latest Chat (Most Recent User Interaction):**
+        {latest_chat}
+
+        **User Query (Answer This Only):**
+        {query}
+        """
     )
 
-    formatted_prompt = prompt_template.format(query=query, contexts=contexts)
-    print(f"Formatted Prompt: {formatted_prompt}")
+    formatted_prompt = prompt_template.format(
+        contexts=contexts, history=history, latest_chat=latest_chat, query=query
+    )
     return formatted_prompt
 
 def get_validation_prompt(response: str, query: str) -> str:
