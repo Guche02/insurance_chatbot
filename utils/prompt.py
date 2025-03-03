@@ -22,7 +22,6 @@ def get_prompt(contexts: str, history: str, latest_chat: str, query: str) -> str
         - Incorporate relevant details from the **Latest Chat** for real-time awareness.
         - Answer only based on the provided **Context, History Summary, and Latest Chat**. Do not use external knowledge.
         - If the **Context** already answers the question, do not repeat the information.
-        - If the **Context, History Summary, and Latest Chat** do not provide sufficient details, respond only with: **"I don't have that information."**
 
         **Context (Reference Material):**
         {contexts}
@@ -104,9 +103,7 @@ def get_summarize_prompt(data):
         """
     )
 
-    # Ensuring we are correctly formatting the prompt with the 'data' variable.
     formatted_prompt = prompt_template.format(data=data)
-    # print(f"Formatted Prompt: {formatted_prompt}")
 
     return formatted_prompt
 

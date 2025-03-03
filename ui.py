@@ -7,26 +7,24 @@ def main():
     """
     st.set_page_config(page_title="Chat", layout="wide")
     st.title("💬 Chat")
-
+    
     if "messages" not in st.session_state:
         st.session_state.messages = []
-
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.write(message["content"])  
-
+    
+    category = st.selectbox("Select a category:", ["Login", "Enrollment"])
+    
     user_input = st.chat_input("Type your message...")
-
+    
     if user_input:
-        st.session_state.messages.append({"role": "user", "content": user_input})
-
+        st.session_state.messages.append({"role": "user", "content": f"[{category}] {user_input}"})
+        
         with st.chat_message("user"):
-            st.write(user_input)
-
-        bot_response = chatbot(user_input)
-
+            st.write(f"[{category}] {user_input}")
+        
+        bot_response = chatbot(user_input, category)
+        
         st.session_state.messages.append({"role": "assistant", "content": bot_response})
-
+        
         with st.chat_message("assistant"):
             st.write(bot_response)
 
