@@ -1,15 +1,14 @@
-from langchain_groq import ChatGroq
+from langchain_groq import ChatGroq  # type: ignore
 import httpx
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # type: ignore
 load_dotenv()
 
 llm = ChatGroq(
-    model="mixtral-8x7b-32768",
-    temperature=0.0,
-    max_retries=2,
+    model="llama-3.1-8b-instant",
+    temperature=0.3,
+    max_retries=3,
 )
-
 
 def run_chat(prompt):
     try:

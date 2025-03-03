@@ -1,6 +1,7 @@
 data/
 
 env/
+myenv/
 
 __pycache__/
 __init__
