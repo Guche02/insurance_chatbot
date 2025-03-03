@@ -29,12 +29,10 @@ def get_validation_prompt(response: str, query: str) -> str:
         """  
         You are an AI assistant validating an insurance response that exactly follows the below instructions.
 
-        - Check if the response correctly answers the given question.  
-        - If it fully answers the question, return the initial response.
-        - If the question needs for details. Ask for additional details.
-        - If it does not answer or is irrelevant, return only **"Please contact the office or provide more specifc details for this question."**  
+        - Check if the response is extremely irrelavant to the user query. Return **"Please contact the office or provide more details"**.
+        - If the response is relevant, return the response provided itsel.
         - Don't generate any additional explanations.
-
+        
         **User Question:**  
         {query}  
 
@@ -46,6 +44,27 @@ def get_validation_prompt(response: str, query: str) -> str:
     formatted_prompt = prompt_template.format(query=query, response=response)
     print(f"Formatted Prompt: {formatted_prompt}")
     return prompt_template.format(response=response, query=query)
+
+
+def get_query_category(query: str) -> str:
+    prompt_template = PromptTemplate(
+        input_variables=["query"],
+        template=
+        """
+        You are an AI assistant categorizing user queries related to login and user accounts.
+        
+        - If the query is related to login, username, password, or account access, return **"login"**.
+        - For all other queries, return **"others"**.
+        - Don't generate any additional explanations.
+
+        **User Query:**  
+        {query}  
+        """
+    )
+    
+    formatted_prompt = prompt_template.format(query=query)
+    print(f"Formatted Prompt: {formatted_prompt}")
+    return prompt_template.format(query=query)
 
 def get_summarize_prompt(data):
 
