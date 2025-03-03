@@ -22,6 +22,7 @@ def get_prompt(contexts: str, history: str, latest_chat: str, query: str) -> str
         - Incorporate relevant details from the **Latest Chat** for real-time awareness.
         - Answer only based on the provided **Context, History Summary, and Latest Chat**. Do not use external knowledge.
         - If the **Context** already answers the question, do not repeat the information.
+        - Do not refer to the **Context, History Summary, or Latest Chat** in the response.
 
         **Context (Reference Material):**
         {contexts}
