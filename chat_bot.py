@@ -1,5 +1,5 @@
 from chromadb import PersistentClient  # type: ignore
-from utils.prompt import get_prompt, get_validation_prompt, get_query_category
+from utils.prompt import get_prompt_login, get_validation_prompt, get_query_category
 from utils.llm import run_chat_login, run_chat_others
 from sentence_transformers import SentenceTransformer   # type: ignore
 from dotenv import load_dotenv # type: ignore
@@ -72,7 +72,7 @@ def chatbot(question, category, oldest_timestamp):
 
     history_summary = summarize(latest_documents)
     print(f"Chat History Summary: {history_summary}\n")
-    prompt = get_prompt(context['documents'], history_summary,history_collection.find_one(
+    prompt = get_prompt_login(context['documents'], history_summary,history_collection.find_one(
     {"created_at": {"$gt": oldest_timestamp}},  
     sort=[("created_at", -1)]  ), question)
     print(f"Final Prompt: {prompt}")
@@ -91,5 +91,5 @@ def chatbot(question, category, oldest_timestamp):
     })
     return response
 
-# print(f"Answer: {chatbot("how to login as an agent?", "Login")}")
-# print(f"Answer: {chatbot("And as a user?", "login")}")
+# print(chatbot("how to login as an agent?", "Login"))
+# print(chatbot("And as a user?", "login"))

@@ -1,5 +1,5 @@
 from datetime import datetime
-import streamlit as st
+import streamlit as st   # type: ignore
 from chat_bot import chatbot
 
 def main():
@@ -26,7 +26,7 @@ def main():
     for message in st.session_state.messages[category]:
         with st.chat_message(message["role"]):
             st.write(message["content"])
-            st.caption(f"{message['timestamp'].strftime("%Y-%m-%d %H:%M:%S")}")
+            st.caption(f'{message["timestamp"].strftime("%Y-%m-%d %H:%M:%S")}')
 
     #get user input
     user_input = st.chat_input("Type your message...")
@@ -62,7 +62,7 @@ def main():
 
         with st.chat_message("assistant"):
             st.write(bot_response)
-            st.caption(f"{timestamp.strftime("%Y-%m-%d %H:%M:%S")}")
+            st.caption(f'{timestamp.strftime("%Y-%m-%d %H:%M:%S")}')
 
 if __name__ == "__main__":
     main()

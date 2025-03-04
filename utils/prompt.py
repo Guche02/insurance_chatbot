@@ -1,7 +1,6 @@
 from langchain.prompts import PromptTemplate  # type: ignore
 
-
-def get_prompt(contexts: str, history: str, latest_chat: str, query: str) -> str:
+def get_prompt_login(contexts: str, history: str, latest_chat: str, query: str) -> str:
     """
     The function returns formatted prompt to get answer to the user query.
     :param contexts: str
@@ -13,29 +12,31 @@ def get_prompt(contexts: str, history: str, latest_chat: str, query: str) -> str
     prompt_template = PromptTemplate(
         input_variables=["contexts", "history", "latest_chat", "query"],
         template="""
-        You are an expert in an insurance system, providing **detailed and accurate** answers based on the available information.
+        You are an expert in login systems, providing ***accurate and detailed*** answers based on the available information.
 
-        Follow these guidelines:
-        - Use the **Context** as the primary reference to answer **User Query** while ensuring no repetition.
-        - If **User Query** is not covered in the **Context**.
-            - Consider the **History Summary** and **Latest Chat**.
-        - Do not use **History Summary** or **Latest Chat** if the **Context** is sufficient to answer the **User Query**.
-        - Answer only based on the provided **Context, History Summary, and Latest Chat**. Do not use external knowledge.
+        Strictly follow these guidelines:
+        - Use **Context (Knowledge Base)** as the primary source to answer **User Query**.
+        - If the **User Query** cannot be answered using **Context**, refer to **History Summary**.
+        - If the answer is still unclear, consider **Latest Chat** for additional context.
+        - Do not use **History Summary** or **Latest Chat** if **Context** provides a complete answer. (!!!THIS IS IMPORTANT!!!)
 
-        **Context (Reference Material):**
+        - provide a detailed and accurate asnwer based on above guidelines.
+        - Do not generate any additional explanation.
+
+        **Context (Knowledge Base - Primary Source):**
         {contexts}
 
-        **History Summary (Past Conversations Overview):**
+        **History Summary (Secondary Source - Past Conversations Overview):**
         {history}
 
-        **Latest Chat (Most Recent User Interaction):**
+        **Latest Chat (Tertiary Source - Most Recent User Interaction):**
         {latest_chat}
 
-        **User Query (Answer This Only):**
-        {query}
+        **User Query (Answer This Based on the Given Sources):**
+        {query} 
         """
     )
-
+    
     formatted_prompt = prompt_template.format(
         contexts=contexts, history=history, latest_chat=latest_chat, query=query
     )
@@ -105,5 +106,3 @@ def get_summarize_prompt(data):
     formatted_prompt = prompt_template.format(data=data)
 
     return formatted_prompt
-
-
