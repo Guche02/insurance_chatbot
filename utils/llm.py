@@ -1,21 +1,15 @@
 from langchain_groq import ChatGroq  # type: ignore
 import httpx
-import os
-from dotenv import load_dotenv  # type: ignore
-import google.generativeai as genai
 
-genai.configure(api_key="AIzaSyBjKMLKyAyP-YPZttNPvgt1rooXpC4fQY8")
-model = genai.GenerativeModel("gemini-1.5-flash")
-
-load_dotenv()
-
-def gemi(prompt):
-
-  response = model.generate_content(prompt)
-  return response.text
 
 llm_login = ChatGroq(
     model="llama-3.1-8b-instant",
+    temperature=0.3,
+    max_retries=3,
+)
+
+llm_enrollment = ChatGroq(
+    model="llama-3.1-3b-preview",
     temperature=0.3,
     max_retries=3,
 )
@@ -55,7 +49,7 @@ def run_chat_login(prompt):
    
 def run_enrollment_chat(prompt):
     try:
-        response = gemi(prompt)
+        response = llm_enrollment.invoke(prompt)
         # if hasattr(response, 'content'):
         #     return response.content  
         
@@ -85,7 +79,7 @@ def run_enrollment_chat(prompt):
     
 def run_chat_others(prompt):
     try:
-        response = gemi(prompt)
+        response = llm_enrollment.invoke(prompt)
         # if hasattr(response, 'content'):
         #     return response.content  
         
