@@ -10,19 +10,17 @@ def get_prompt(contexts: str, history: str, latest_chat: str, query: str) -> str
     :param query: str
     :return: str
     """
-
     prompt_template = PromptTemplate(
         input_variables=["contexts", "history", "latest_chat", "query"],
         template="""
         You are an expert in an insurance system, providing **detailed and accurate** answers based on the available information.
 
         Follow these guidelines:
-        - Use the **Context** as the primary reference while ensuring no repetition.
-        - Consider the **History Summary** to maintain continuity and avoid redundant responses.
-        - Incorporate relevant details from the **Latest Chat** for real-time awareness.
+        - Use the **Context** as the primary reference to answer **User Query** while ensuring no repetition.
+        - If **User Query** is not covered in the **Context**.
+            - Consider the **History Summary** and **Latest Chat**.
+        - Do not use **History Summary** or **Latest Chat** if the **Context** is sufficient to answer the **User Query**.
         - Answer only based on the provided **Context, History Summary, and Latest Chat**. Do not use external knowledge.
-        - If the **Context** already answers the question, do not repeat the information.
-        - Do not refer to the **Context, History Summary, or Latest Chat** in the response.
 
         **Context (Reference Material):**
         {contexts}

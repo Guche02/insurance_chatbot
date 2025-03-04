@@ -10,9 +10,9 @@ load_dotenv()
 
 model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-client = PersistentClient(path="new_vector_db/")
-collection = client.get_collection(name="login_related_chunks")
-
+client = PersistentClient(path="insurance_vectordb/")
+login_collection = client.get_collection(name="login_knowlage_base")
+enrollement_collection = client.get_collection(name="enrollement_knowlage_base")
 #print(collection.count())
 
 import pymongo
@@ -20,13 +20,20 @@ import pymongo
 mongo_url = os.getenv("MONGO_URL")
 client = pymongo.MongoClient(mongo_url)
 db = client.insurance_chat_history
-mongo_collection = db.chat_history
+login_collection = db.login_chat_history
+enrollment_collection = db.enrollment_chat_history
 
 from datetime import datetime
 
 def chatbot(question, category):
 
     """Takes in user question and returns answer."""
+    
+    if category == "Login":
+      mongo_collection = login_collection
+    else:
+        mongo_collection = enrollment_collection
+    
     #get the latest chat
     latest_chat = mongo_collection.find_one(sort=[("created_at", -1)])
     #print(f"Latest chat: {latest_chat}")
@@ -43,6 +50,11 @@ def chatbot(question, category):
     
     #encode question/latestchat
     question_embedding = model.encode(question_history)
+    
+    if category == "login":
+        collection = login_collection
+    else:
+        collection = enrollement_collection
   
     #get context
     context = collection.query(

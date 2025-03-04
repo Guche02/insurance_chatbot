@@ -5,13 +5,13 @@ from dotenv import load_dotenv  # type: ignore
 load_dotenv()
 
 llm_login = ChatGroq(
-    model="llama-3.1-8b-instant",
+    model="llama-3.2-1b-preview",
     temperature=0.3,
     max_retries=3,
 )
 
 llm_others = ChatGroq(
-    model="llama-3.1-8b-instant",
+    model="llama-3.2-1b-preview",
     temperature=0.3,
     max_retries=3,
 )
