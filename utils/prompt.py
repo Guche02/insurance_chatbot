@@ -1,7 +1,48 @@
 from langchain.prompts import PromptTemplate  # type: ignore
 
 
-def get_prompt(contexts: str, history: str, latest_chat: str, query: str) -> str:
+def get_prompt_login(contexts: str, history: str, latest_chat: str, query: str) -> str:
+    """
+    The function returns formatted prompt to get answer to the user query.
+    :param contexts: str
+    :param history: str
+    :param latest_chat: str
+    :param query: str
+    :return: str
+    """
+    prompt_template = PromptTemplate(
+        input_variables=["contexts", "history", "latest_chat", "query"],
+        template="""
+        You are an expert in an insurance system, providing **detailed and accurate** answers based on the available information.
+
+        Follow these guidelines:
+        - Use the **Context** as the primary reference to answer **User Query** while ensuring no repetition.
+        - If **User Query** is not covered in the **Context**.
+            - Consider the **History Summary** and **Latest Chat**.
+        - Do not use **History Summary** or **Latest Chat** if the **Context** is sufficient to answer the **User Query**.
+        - Answer only based on the provided **Context, History Summary, and Latest Chat**. Do not use external knowledge.
+
+        **Context (Reference Material):**
+        {contexts}
+
+        **History Summary (Past Conversations Overview):**
+        {history}
+
+        **Latest Chat (Most Recent User Interaction):**
+        {latest_chat}
+
+        **User Query (Answer This Only):**
+        {query}
+        """
+    )
+
+    formatted_prompt = prompt_template.format(
+        contexts=contexts, history=history, latest_chat=latest_chat, query=query
+    )
+    return formatted_prompt
+
+
+def get_prompt_enrollment(contexts: str, history: str, latest_chat: str, query: str) -> str:
     """
     The function returns formatted prompt to get answer to the user query.
     :param contexts: str

@@ -1,6 +1,6 @@
 from chromadb import PersistentClient  # type: ignore
-from utils.prompt import get_prompt, get_validation_prompt, get_query_category
-from utils.llm import run_chat_login, run_chat_others
+from utils.prompt import get_prompt_login,get_prompt_enrollment, get_validation_prompt, get_query_category
+from utils.llm import run_chat_login, run_chat_others, run_enrollment_chat
 from sentence_transformers import SentenceTransformer   # type: ignore
 from dotenv import load_dotenv # type: ignore
 import os
@@ -30,10 +30,12 @@ def chatbot(question, category, oldest_timestamp):
       history_collection = login_collection
       response_function = run_chat_login
       vector_collection = login_collection_db
+      prompt_function = get_prompt_login
     elif category == "Enrollment":
         history_collection = enrollment_collection
-        response_function = run_chat_others
+        response_function = run_enrollment_chat
         vector_collection = enrollment_collection_db
+        prompt_function = get_prompt_enrollment
         
     else:
         return "Error: Invalid category. Please provide a valid category."
@@ -72,7 +74,7 @@ def chatbot(question, category, oldest_timestamp):
 
     history_summary = summarize(latest_documents)
     print(f"Chat History Summary: {history_summary}\n")
-    prompt = get_prompt(context['documents'], history_summary,history_collection.find_one(
+    prompt = prompt_function(context['documents'], history_summary,history_collection.find_one(
     {"created_at": {"$gt": oldest_timestamp}},  
     sort=[("created_at", -1)]  ), question)
     print(f"Final Prompt: {prompt}")
@@ -91,5 +93,5 @@ def chatbot(question, category, oldest_timestamp):
     })
     return response
 
-# print(f"Answer: {chatbot("how to login as an agent?", "Login")}")
+print(f"Answer: {chatbot("how to enroll in a plan?", "Enrollment",datetime.utcnow())}")
 # print(f"Answer: {chatbot("And as a user?", "login")}")
