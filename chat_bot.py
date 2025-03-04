@@ -43,7 +43,7 @@ def chatbot(question, category, oldest_timestamp):
 
     print("response function used: ", response_function)
     
-    latest_chat = history_collection.find_one(sort=[("created_at", -1)])
+    latest_chat = history_collection.find_one({"created_at": {"$gt": oldest_timestamp}},  sort=[("created_at", -1)])
     print(f"Latest chat: {latest_chat}")
     
     latest_chat_question = latest_chat['question'] if latest_chat else ""
@@ -65,8 +65,8 @@ def chatbot(question, category, oldest_timestamp):
       
     latest_documents = list(
     history_collection.find({"created_at": {"$gt": oldest_timestamp}})
-    .sort("created_at", -1)  # Sort by created_at in descending order
-    .limit(3)  # Limit the number of documents
+    .sort("created_at", -1) 
+    .limit(3)  
 )
     print("Latest documents: ", latest_documents)
 

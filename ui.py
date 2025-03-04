@@ -9,6 +9,7 @@ def main():
     st.set_page_config(page_title="Chat", layout="wide")
     st.title("💬 Chat")
 
+    #chat toggle
     if "selected_category" not in st.session_state:
         st.session_state.selected_category = "Login"
 
@@ -21,18 +22,19 @@ def main():
     if category != st.session_state.selected_category:
         st.session_state.selected_category = category
 
+    #display chat history
     for message in st.session_state.messages[category]:
         with st.chat_message(message["role"]):
             st.write(message["content"])
-            # Display formatted timestamp
             st.caption(f"{message['timestamp'].strftime("%Y-%m-%d %H:%M:%S")}")
 
+    #get user input
     user_input = st.chat_input("Type your message...")
+
 
     if user_input:
         timestamp = datetime.utcnow()
 
-        # Store user message
         st.session_state.messages[category].append({
             "role": "user",
             "content": user_input,
@@ -52,16 +54,15 @@ def main():
 
         timestamp = datetime.utcnow()
 
-        # Store bot response
         st.session_state.messages[category].append({
             "role": "assistant",
             "content": bot_response,
             "timestamp": timestamp
-        })
+        })  
 
         with st.chat_message("assistant"):
             st.write(bot_response)
-            st.caption(f"{timestamp}")
+            st.caption(f"{timestamp.strftime("%Y-%m-%d %H:%M:%S")}")
 
 if __name__ == "__main__":
     main()
