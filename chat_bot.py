@@ -30,10 +30,12 @@ def chatbot(question, category, oldest_timestamp):
       history_collection = login_collection
       response_function = run_chat_login
       vector_collection = login_collection_db
+      prompt_function = get_prompt_login
     elif category == "Enrollment":
         history_collection = enrollment_collection
-        response_function = run_chat_others
+        response_function = run_enrollment_chat
         vector_collection = enrollment_collection_db
+        prompt_function = get_prompt_enrollment
         
     else:
         return "Error: Invalid category. Please provide a valid category."
