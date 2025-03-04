@@ -1,11 +1,22 @@
 import PyPDF2
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_experimental.text_splitter import SemanticChunker
+
+#semantic text splitter used for splitting bronze plan text into chunks
+hf_embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+text_splitter = SemanticChunker(
+    hf_embeddings, breakpoint_threshold_type="standard_deviation",
+)
+
 def get_enrollment_conversations():
+    
     """The function takes in the converations pdf
     including user question/issue, moderator reply, chatbot reply
     and splits each conversation into individual chunks
     then filters out conversations related to enrollment and returns them"""
+    
     text = ""
-    with open("/content/drive/MyDrive/data/processed_data.pdf", "rb") as file:
+    with open("D:\insurance-chatbot\data\processed_data.pdf", "rb") as file:
         reader = PyPDF2.PdfReader(file)
         for page in reader.pages:
             text += page.extract_text()
@@ -35,18 +46,12 @@ def get_enrollment_conversations():
 
     return enrollement_conversation
 
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_experimental.text_splitter import SemanticChunker
-
-hf_embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-
-text_splitter = SemanticChunker(
-    hf_embeddings, breakpoint_threshold_type="standard_deviation",
-)
-
 def get_split_bronze_plan():
+    
+    """The function reads the bronze plan pdf and splits the text into chunks"""
+    
     text = ""
-    with open("/content/drive/MyDrive/data/bronze_plan.pdf", "rb") as file:
+    with open("D:\\insurance-chatbot\\data\\bronze_plan.pdf", "rb") as file:
         reader = PyPDF2.PdfReader(file)
         for page in reader.pages:
             text += page.extract_text()
