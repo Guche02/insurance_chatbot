@@ -1,6 +1,6 @@
 from chromadb import PersistentClient  # type: ignore
-from utils.prompt import get_prompt_login, get_validation_prompt, get_query_category
-from utils.llm import run_chat_login, run_chat_others
+from utils.prompt import get_prompt_login, get_validation_prompt, get_query_category, get_prompt_enrollment
+from utils.llm import run_chat_login, run_chat_others, run_enrollment_chat
 from sentence_transformers import SentenceTransformer   # type: ignore
 from dotenv import load_dotenv # type: ignore
 import os

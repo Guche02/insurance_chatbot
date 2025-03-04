@@ -42,6 +42,48 @@ def get_prompt_login(contexts: str, history: str, latest_chat: str, query: str) 
     )
     return formatted_prompt
 
+def get_prompt_enrollment(contexts: str, history: str, latest_chat: str, query: str) -> str:
+    """
+    The function returns formatted prompt to get answer to the user query.
+    :param contexts: str
+    :param history: str
+    :param latest_chat: str
+    :param query: str
+    :return: str
+    """
+    prompt_template = PromptTemplate(
+        input_variables=["contexts", "history", "latest_chat", "query"],
+        template="""
+        You are an expert in login systems, providing ***accurate and detailed*** answers based on the available information.
+
+        Strictly follow these guidelines:
+        - Use **Context (Knowledge Base)** as the primary source to answer **User Query**.
+        - If the **User Query** cannot be answered using **Context**, refer to **History Summary**.
+        - If the answer is still unclear, consider **Latest Chat** for additional context.
+        - Do not use **History Summary** or **Latest Chat** if **Context** provides a complete answer. (!!!THIS IS IMPORTANT!!!)
+
+        - provide a detailed and accurate asnwer based on above guidelines.
+        - Do not generate any additional explanation.
+
+        **Context (Knowledge Base - Primary Source):**
+        {contexts}
+
+        **History Summary (Secondary Source - Past Conversations Overview):**
+        {history}
+
+        **Latest Chat (Tertiary Source - Most Recent User Interaction):**
+        {latest_chat}
+
+        **User Query (Answer This Based on the Given Sources):**
+        {query} 
+        """
+    )
+    
+    formatted_prompt = prompt_template.format(
+        contexts=contexts, history=history, latest_chat=latest_chat, query=query
+    )
+    return formatted_prompt
+
 def get_validation_prompt(response: str, query: str) -> str:
     prompt_template = PromptTemplate(
         input_variables=["response", "query"],
