@@ -23,20 +23,23 @@ db = client.insurance_chat_history
 login_collection = db.login_chat_history
 enrollment_collection = db.enrollment_chat_history
 
-def chatbot(question, category):
+def chatbot(question, category, oldest_timestamp):
     """Takes in user question and returns answer."""
     
     if category == "Login":
       history_collection = login_collection
       response_function = run_chat_login
       vector_collection = login_collection_db
-    else:
+    elif category == "Enrollment":
         history_collection = enrollment_collection
         response_function = run_chat_others
         vector_collection = enrollment_collection_db
+        
+    else:
+        return "Error: Invalid category. Please provide a valid category."
 
     print("History collection used: ", history_collection)
-    print("Vector collection used: ", history_collection)
+    print("Vector collection used: ", vector_collection)
 
     print("response function used: ", response_function)
     
@@ -56,16 +59,22 @@ def chatbot(question, category):
     #get context
     context = vector_collection.query(
         query_embeddings=question_embedding,
-        n_results=3
+        n_results=3,
     )
     print(f"Retrieved context: {context}")
       
-    latest_documents = list(history_collection.find().sort("created_at", -1).limit(3))
+    latest_documents = list(
+    history_collection.find({"created_at": {"$gt": oldest_timestamp}})
+    .sort("created_at", -1)  # Sort by created_at in descending order
+    .limit(3)  # Limit the number of documents
+)
     print("Latest documents: ", latest_documents)
 
     history_summary = summarize(latest_documents)
     print(f"Chat History Summary: {history_summary}\n")
-    prompt = get_prompt(context['documents'], history_summary, history_collection.find_one(sort=[("created_at", -1)]), question)
+    prompt = get_prompt(context['documents'], history_summary,history_collection.find_one(
+    {"created_at": {"$gt": oldest_timestamp}},  
+    sort=[("created_at", -1)]  ), question)
     print(f"Final Prompt: {prompt}")
       
     response = response_function(prompt)
@@ -82,5 +91,5 @@ def chatbot(question, category):
     })
     return response
 
-print(f"Answer: {chatbot("how to login as an agent?", "login")}")
-print(f"Answer: {chatbot("And as a user?", "login")}")
+# print(f"Answer: {chatbot("how to login as an agent?", "Login")}")
+# print(f"Answer: {chatbot("And as a user?", "login")}")

@@ -1,4 +1,5 @@
-import streamlit as st  # type: ignore
+from datetime import datetime
+import streamlit as st
 from chat_bot import chatbot
 
 def main():
@@ -11,7 +12,8 @@ def main():
     if "selected_category" not in st.session_state:
         st.session_state.selected_category = "Login"
 
-    category = st.selectbox("Select a category:", ["Login", "Enrollment"], index=["Login", "Enrollment"].index(st.session_state.selected_category))
+    category = st.selectbox("Select a category:", ["Login", "Enrollment"], 
+                            index=["Login", "Enrollment"].index(st.session_state.selected_category))
 
     if "messages" not in st.session_state:
         st.session_state.messages = {"Login": [], "Enrollment": []}
@@ -22,19 +24,44 @@ def main():
     for message in st.session_state.messages[category]:
         with st.chat_message(message["role"]):
             st.write(message["content"])
+            # Display formatted timestamp
+            st.caption(f"{message['timestamp'].strftime("%Y-%m-%d %H:%M:%S")}")
 
     user_input = st.chat_input("Type your message...")
 
     if user_input:
-        st.session_state.messages[category].append({"role": "user", "content": user_input})
+        timestamp = datetime.utcnow()
+
+        # Store user message
+        st.session_state.messages[category].append({
+            "role": "user",
+            "content": user_input,
+            "timestamp": timestamp
+        })
+
         with st.chat_message("user"):
             st.write(user_input)
+            st.caption(f'{timestamp.strftime("%Y-%m-%d %H:%M:%S")}')
+            
+        if st.session_state.messages[category]:
+            oldest_timestamp = st.session_state.messages[category][0]["timestamp"]
+        else:
+            oldest_timestamp = datetime.utcnow() 
 
-        bot_response = chatbot(user_input, category)
+        bot_response = chatbot(user_input, category,oldest_timestamp)
 
-        st.session_state.messages[category].append({"role": "assistant", "content": bot_response})
+        timestamp = datetime.utcnow()
+
+        # Store bot response
+        st.session_state.messages[category].append({
+            "role": "assistant",
+            "content": bot_response,
+            "timestamp": timestamp
+        })
+
         with st.chat_message("assistant"):
             st.write(bot_response)
+            st.caption(f"{timestamp}")
 
 if __name__ == "__main__":
     main()
