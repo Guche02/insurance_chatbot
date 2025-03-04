@@ -51,7 +51,7 @@ def get_validation_prompt(response: str, query: str) -> str:
         You are an AI assistant validating an insurance response that exactly follows the below instructions.
 
         - Check if the response is extremely irrelavant to the user query. Return **"Please contact the office or provide more details"**.
-        - If the response is relevant, return the response provided itsel.
+        - If the response is relevant, return the response provided itself.
         - Don't generate any additional explanations.
         
         **User Question:**  
