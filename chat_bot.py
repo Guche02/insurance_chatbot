@@ -13,7 +13,7 @@ load_dotenv()
 model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 client = PersistentClient(path="insurance_vectordb/")
-login_collection_db = client.get_collection(name="login_knowlage_base")
+login_collection_db = client.get_collection(name="enrollement_knowlage_base")
 enrollment_collection_db = client.get_collection(name="enrollement_knowlage_base")
 #print(collection.count())
 
@@ -93,5 +93,5 @@ def chatbot(question, category, oldest_timestamp):
     })
     return response
 
-print(f"Answer: {chatbot("how to enroll in a plan?", "Enrollment",datetime.utcnow())}")
+# print(f"Answer: {chatbot("how to enroll in a plan?", "Enrollment",datetime.utcnow())}")
 # print(f"Answer: {chatbot("And as a user?", "login")}")

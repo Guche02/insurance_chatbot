@@ -61,7 +61,8 @@ def get_prompt_enrollment(contexts: str, history: str, latest_chat: str, query: 
         - If **User Query** is not covered in the **Context**.
             - Consider the **History Summary** and **Latest Chat**.
         - Do not use **History Summary** or **Latest Chat** if the **Context** is sufficient to answer the **User Query**.
-        - Answer only based on the provided **Context, History Summary, and Latest Chat**. Do not use external knowledge.
+        - Answer only based on the provided **Context, History Summary, and Latest Chat**. Do not use external knowledge 
+        - Do not mentions **Context, History Summary, and Latest Chat** in the response.
 
         **Context (Reference Material):**
         {contexts}

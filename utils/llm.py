@@ -9,13 +9,13 @@ llm_login = ChatGroq(
 )
 
 llm_enrollment = ChatGroq(
-    model="llama-3.1-3b-preview",
+    model="llama-3.1-8b-instant",
     temperature=0.3,
     max_retries=3,
 )
 
 llm_others = ChatGroq(
-    model="llama-3.1-3b-preview",
+    model="llama-3.1-8b-instant",
     temperature=0.3,
     max_retries=3,
 )
@@ -50,11 +50,11 @@ def run_chat_login(prompt):
 def run_enrollment_chat(prompt):
     try:
         response = llm_enrollment.invoke(prompt)
-        # if hasattr(response, 'content'):
-        #     return response.content  
+        if hasattr(response, 'content'):
+            return response.content  
         
-        # return f"Error: Unexpected response format. Response did not contain 'content'."
-        return response
+        return f"Error: Unexpected response format. Response did not contain 'content'."
+        # return response
         
     except httpx.HTTPStatusError as e:
         try:
@@ -80,11 +80,11 @@ def run_enrollment_chat(prompt):
 def run_chat_others(prompt):
     try:
         response = llm_enrollment.invoke(prompt)
-        # if hasattr(response, 'content'):
-        #     return response.content  
+        if hasattr(response, 'content'):
+            return response.content  
         
-        # return f"Error: Unexpected response format. Response did not contain 'content'."
-        return response
+        return f"Error: Unexpected response format. Response did not contain 'content'."
+        # return response
         
     except httpx.HTTPStatusError as e:
         try:
