@@ -73,10 +73,10 @@ def handle_http_error(e):
 
 
 def run_chat_login(prompt):
-    return llm_login(prompt)  # Uses Mistral-3B
+    return run_chat_groq(prompt, llm_enrollment)   # Uses Mistral-3B
 
 def run_enrollment_chat(prompt):
-    return run_chat_groq(prompt, llm_enrollment)  # Uses Llama-3.1-8B
+    return run_chat_groq(prompt, llm_enrollment) 
 
 def run_chat_others(prompt):
     return run_chat_groq(prompt, llm_others)  # Uses Llama-3.1-8B

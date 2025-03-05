@@ -4,11 +4,15 @@ from chromadb import PersistentClient
 from sentence_transformers import SentenceTransformer
 import uuid
 
-# enrollement_conversation = get_enrollment_conversations()
-# bronze_plan = get_split_bronze_plan()
-# enrollement_chunks = enrollement_conversation+bronze_plan
+enrollement_conversation = get_enrollment_conversations()
+bronze_plan = get_split_bronze_plan()
+enrollement_chunks = enrollement_conversation+bronze_plan
 
-enrollement_chunks = get_split_bronze_plan()
+print(f"Total number of chunks: {len(enrollement_chunks)}")
+
+unique_enrollement_chunks = list(set(enrollement_chunks))
+
+print(f"Total number of unique chunks: {len(unique_enrollement_chunks)}")
 
 
 docs = [Document(page_content=chunk) for chunk in enrollement_chunks]

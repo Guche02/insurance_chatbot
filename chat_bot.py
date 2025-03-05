@@ -23,15 +23,19 @@ db = client.insurance_chat_history
 login_collection = db.login_chat_history
 enrollment_collection = db.enrollment_chat_history
 
-def chatbot(question, category, oldest_timestamp):
+def chatbot(question, oldest_timestamp):
     """Takes in user question and returns answer."""
     
-    if category == "Login":
+    category = run_chat_others(get_query_category(question))
+    print(f"Category: {category}")
+    
+    if category == "login":
       history_collection = login_collection
       response_function = run_chat_login
       vector_collection = login_collection_db
       prompt_function = get_prompt_login
-    elif category == "Enrollment":
+      
+    elif category == "enrollment":
         history_collection = enrollment_collection
         response_function = run_enrollment_chat
         vector_collection = enrollment_collection_db
@@ -61,10 +65,27 @@ def chatbot(question, category, oldest_timestamp):
     #get context
     context = vector_collection.query(
         query_embeddings=question_embedding,
-        n_results=3,
+        n_results=5,
     )
     print(f"Retrieved context: {context}")
-      
+
+    # context = list(set(context))
+    # Assuming context is the dictionary you've provided
+    documents = context.get('documents', [])
+    
+    print(f"Retrieved documents: {documents}")
+    print(f"Type Retrieved documents: {type(documents)}")
+    print(f"Cleaned data len: {len(documents)}")
+    flattened_doc=[item for sublist in documents for item in sublist]
+
+    print(f"Flattned Data: {flattened_doc}")
+    print(f"Flattned data len: {len(flattened_doc)}")
+
+    context = list(set(flattened_doc))
+    
+    print(f"Cleaned context: {context}")
+    print(f"Length clened context: {len(context)}")
+    
     latest_documents = list(
     history_collection.find({"created_at": {"$gt": oldest_timestamp}})
     .sort("created_at", -1) 
@@ -74,7 +95,7 @@ def chatbot(question, category, oldest_timestamp):
 
     history_summary = summarize(latest_documents)
     print(f"Chat History Summary: {history_summary}\n")
-    prompt = get_prompt_login(context['documents'], history_summary,history_collection.find_one(
+    prompt = prompt_function(context, history_summary,history_collection.find_one(
     {"created_at": {"$gt": oldest_timestamp}},  
     sort=[("created_at", -1)]  ), question)
     print(f"Final Prompt: {prompt}")
@@ -91,7 +112,7 @@ def chatbot(question, category, oldest_timestamp):
         "answer": response,
         "created_at": datetime.utcnow()
     })
-    return response
+    return validation_result
 
 # print(chatbot("how to login as an agent?", "Login"))
 # print(chatbot("And as a user?", "login"))

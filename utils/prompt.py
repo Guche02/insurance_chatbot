@@ -42,47 +42,103 @@ def get_prompt_login(contexts: str, history: str, latest_chat: str, query: str) 
     )
     return formatted_prompt
 
+
+# def get_prompt_enrollment(contexts: str, history: str, latest_chat: str, query: str) -> str:
+#     """
+#     Generates a structured prompt to answer a user's query regarding insurance enrollment.
+
+#     :param contexts: str - Primary knowledge base information.
+#     :param history: str - Summary of past interactions.
+#     :param latest_chat: str - Most recent user interaction.
+#     :param query: str - User's current query.
+#     :return: str - Formatted prompt for generating a response.
+#     """
+    
+#     prompt_template = PromptTemplate(
+#         input_variables=["contexts", "history", "latest_chat", "query"],
+#         template=
+#         """
+#             ### SYSTEM MESSAGE  
+#             You are an expert in **insurance enrollment** chatbot that provides **accurate, clear, and direct** responses to help user.
+
+#             ### GUIDELINES  
+#             1. Use **only the information provided** to answer the user's query.  
+#             2. **DO NOT** say "Based on the Context" or "mention in context" reference the sources directly.  
+#             3. **Rephrase and integrate** the information naturally—avoid copying text verbatim.  
+#             4. If the query **cannot** be answered with certainty, say so rather than making assumptions.  
+#             5. **DO NOT** use any special formatting (e.g., bold, italics, hyperlinks) from the source.  
+
+
+#             ---
+
+#             ### BACKGROUND INFORMATION (Use This to Answer the Query) 
+#             {contexts}  
+
+#             ---
+
+#             ### LATEST USER INTERACTION  
+#             {latest_chat}   
+
+#             ---
+
+#             ### USER QUERY  (Provide a natural, well-structured response here.)
+#             {query}  
+#         """
+#     )
+    
+#     return prompt_template.format(
+#         contexts=contexts, history=history, latest_chat=latest_chat, query=query
+#     )
+
 def get_prompt_enrollment(contexts: str, history: str, latest_chat: str, query: str) -> str:
     """
-    The function returns formatted prompt to get answer to the user query.
-    :param contexts: str
-    :param history: str
-    :param latest_chat: str
-    :param query: str
-    :return: str
+    Generates a structured prompt to ensure the model provides a natural, context-aware response 
+    without directly referencing source material.
+    
+    :param contexts: str - Primary knowledge base information.
+    :param history: str - Summary of past interactions.
+    :param latest_chat: str - Most recent user interaction.
+    :param query: str - User's current query.
+    :return: str - Formatted prompt for generating a response.
     """
+    
     prompt_template = PromptTemplate(
         input_variables=["contexts", "history", "latest_chat", "query"],
-        template="""
-        You are an expert in login systems, providing ***accurate and detailed*** answers based on the available information.
+        template=
+        
+        """
+            ### SYSTEM MESSAGE  
+            You are an **insurance enrollment expert**, and your task is to **answer the user's query** in a **clear and natural manner**. 
 
-        Strictly follow these guidelines:
-        - Use **Context (Knowledge Base)** as the primary source to answer **User Query**.
-        - If the **User Query** cannot be answered using **Context**, refer to **History Summary**.
-        - If the answer is still unclear, consider **Latest Chat** for additional context.
-        - Do not use **History Summary** or **Latest Chat** if **Context** provides a complete answer. (!!!THIS IS IMPORTANT!!!)
+            **IMPORTANT:**
+            - **Do NOT** reference the source text (Context, History, or Latest Chat) directly in your response.
+            - **Do NOT quote or copy-paste** content from the provided information.
+            - **DO NOT say "Based on the Context" or similar phrases**.
+            - Integrate the relevant information into a **natural, fluent response** without explicitly calling out where it came from.
+            - If the query **cannot be answered with the available information**, **honestly state** that the answer is unclear.
+            - Ensure that your response **does not repeat verbatim** the language in the source material.
 
-        - provide a detailed and accurate asnwer based on above guidelines.
-        - Do not generate any additional explanation.
+            ### BACKGROUND INFORMATION (Use this to answer the query):
+            {contexts}
 
-        **Context (Knowledge Base - Primary Source):**
-        {contexts}
+            ### LATEST USER INTERACTION:
+            {latest_chat}
 
-        **History Summary (Secondary Source - Past Conversations Overview):**
-        {history}
+            ### HISTORY SUMMARY (Use this if needed for additional context):
+            {history}
 
-        **Latest Chat (Tertiary Source - Most Recent User Interaction):**
-        {latest_chat}
+            ### USER QUERY:
+            {query}
 
-        **User Query (Answer This Based on the Given Sources):**
-        {query} 
+            ### RESPONSE:
+            (Provide a concise, clear response. Integrate information without repeating source text or referring to the context explicitly.)
         """
     )
-    
-    formatted_prompt = prompt_template.format(
+
+    return prompt_template.format(
         contexts=contexts, history=history, latest_chat=latest_chat, query=query
     )
-    return formatted_prompt
+
 
 def get_validation_prompt(response: str, query: str) -> str:
     prompt_template = PromptTemplate(
@@ -91,7 +147,7 @@ def get_validation_prompt(response: str, query: str) -> str:
         """  
         You are an AI assistant validating an insurance response that exactly follows the below instructions.
 
-        - Check if the response is extremely irrelavant to the user query. Return **"Please contact the office or provide more details"**.
+        - Check if the response is extremely irrelavant to the user query. Return **"I don't have enough information on that, Please contact the office or provide more details."**.
         - If the response is relevant, return the response provided itself.
         - Don't generate any additional explanations.
         
@@ -116,7 +172,7 @@ def get_query_category(query: str) -> str:
         You are an AI assistant categorizing user queries related to login and user accounts.
         
         - If the query is related to login, username, password, or account access, return **"login"**.
-        - For all other queries, return **"others"**.
+        - For all other queries, return **"enrollment"**.
         - Don't generate any additional explanations.
 
         **User Query:**  
