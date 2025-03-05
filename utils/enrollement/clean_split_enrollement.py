@@ -46,15 +46,27 @@ def get_enrollment_conversations():
 
     return enrollement_conversation
 
+    
 def get_split_bronze_plan():
-    
-    """The function reads the bronze plan pdf and splits the text into chunks"""
-    
-    text = ""
-    with open("D:\\insurance-chatbot\\data\\bronze_plan.pdf", "rb") as file:
-        reader = PyPDF2.PdfReader(file)
-        for page in reader.pages:
-            text += page.extract_text()
-        chunks = text_splitter.split_text(text)
-        return chunks
+  processed_chunks = []  
+
+  with open("D:\\insurance-chatbot\\data\\bronze_plan.pdf", "rb") as file:
+      reader = PyPDF2.PdfReader(file)
+
+      for i,page in enumerate(reader.pages):
+          text = page.extract_text()
+
+          if text:  
+              lines = text.split("\n")
+              first_two = " ".join(lines[:2])
+              remaining_text = "\n".join(lines[2:])
+
+              chunks = text_splitter.split_text(remaining_text)
+              modified_chunks = [f"{first_two}\n{chunk}" for chunk in chunks]  
+              
+              processed_chunks.extend(modified_chunks) 
+  return processed_chunks
+
+
+
 

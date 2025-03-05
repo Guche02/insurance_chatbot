@@ -4,9 +4,11 @@ from chromadb import PersistentClient
 from sentence_transformers import SentenceTransformer
 import uuid
 
-enrollement_conversation = get_enrollment_conversations()
-bronze_plan = get_split_bronze_plan()
-enrollement_chunks = enrollement_conversation+bronze_plan
+# enrollement_conversation = get_enrollment_conversations()
+# bronze_plan = get_split_bronze_plan()
+# enrollement_chunks = enrollement_conversation+bronze_plan
+
+enrollement_chunks = get_split_bronze_plan()
 
 
 docs = [Document(page_content=chunk) for chunk in enrollement_chunks]
@@ -15,7 +17,9 @@ embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 client = PersistentClient(path="insurance_vectordb/")
 
-collection = client.get_or_create_collection(name="enrollement_knowlage_base")
+client.delete_collection("enrollement_knowlage_base")
+
+collection = client.create_collection(name="enrollement_knowlage_base")
 
 embeddings = embedding_model.encode(enrollement_chunks).tolist()
 
