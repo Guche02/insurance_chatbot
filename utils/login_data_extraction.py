@@ -1,4 +1,4 @@
-import chromadb
+import chromadb   # type: ignore
 from sentence_transformers import SentenceTransformer
 from chunking import split_conversations, forgot_password_chunk
 
