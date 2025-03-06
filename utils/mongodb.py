@@ -26,3 +26,9 @@ def get_chat_history(category, oldest_timestamp):
         collection = enrollment_collection
     return list(collection.find({"created_at": {"$gt": oldest_timestamp}}).sort("created_at", -1).limit(3))
 
+def add_collection(category,data):
+    if category == "login":
+        collection = login_collection
+    elif category == "enrollment":
+        collection = enrollment_collection
+    collection.insert_one(data)
