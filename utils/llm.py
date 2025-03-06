@@ -11,13 +11,13 @@ model_mistral = "ministral-3b-latest"
 
 llm_enrollment = ChatGroq(
     model="llama-3.1-8b-instant",
-    temperature=0.3,
+    temperature=0,
     max_retries=3,
 )
 
 llm_others = ChatGroq(
     model="llama-3.1-8b-instant",
-    temperature=0.3,
+    temperature=0,
     max_retries=3,
 )
 
@@ -79,5 +79,5 @@ def run_enrollment_chat(prompt):
     return run_chat_groq(prompt, llm_enrollment) 
 
 def run_chat_others(prompt):
-    return run_chat_groq(prompt, llm_others)  # Uses Llama-3.1-8B
+    return run_chat_groq(prompt, llm_enrollment)  # Uses Llama-3.1-8B
 

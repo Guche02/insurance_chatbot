@@ -1,5 +1,5 @@
 from chromadb import PersistentClient 
-from utils.prompt import get_prompt_login, get_validation_prompt, get_query_category, get_prompt_enrollment
+from utils.prompt import get_prompt_login, get_validation_prompt, get_query_category, get_prompt_enrollment, get_user_enrollment_status
 from utils.llm import run_chat_login, run_chat_others, run_enrollment_chat
 from sentence_transformers import SentenceTransformer  
 from dotenv import load_dotenv 
@@ -23,7 +23,6 @@ def chatbot(question, oldest_timestamp):
     #categorize the question
     category = run_chat_others(get_query_category(question))
 
-    
     if category == "login":
       response_function = run_chat_login
       vector_collection = login_collection_db
@@ -58,7 +57,6 @@ def chatbot(question, oldest_timestamp):
     flattened_doc=[item for sublist in documents for item in sublist]
     context = list(set(flattened_doc))
     
-    
     #create history summary
     history_summary = summarize(history)
     
@@ -72,18 +70,23 @@ def chatbot(question, oldest_timestamp):
     #validate response
     validation_prompt = get_validation_prompt(response, question)
     validation_result = run_chat_others(validation_prompt)
-
+    
+    print("Validation result: ", validation_result)
+    
+    #check is user is enrolled
+    enrollment_status = run_chat_others(get_user_enrollment_status(question))
+    print("Enrollment status: ", enrollment_status)
+    if enrollment_status == "new user":
+        validation_result = validation_result + "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan."
 
     #save chat history 
     add_collection(category,{
         "question": question,
-        "answer": response,
+        "answer": validation_result,
         "created_at": datetime.utcnow()}
     )
     
-    
-    #return validated prompt
-    return validation_result
+    return validation_result 
 
 # print(chatbot("how to login as an agent?", "Login"))
 # print(chatbot("And as a user?", "login"))

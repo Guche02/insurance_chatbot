@@ -1,6 +1,7 @@
 from langchain.prompts import PromptTemplate  # type: ignore
 
 def get_prompt_login(contexts: str, history: str, latest_chat: str, query: str) -> str:
+    
     """
     The function returns formatted prompt to get answer to the user query.
     :param contexts: str
@@ -11,7 +12,8 @@ def get_prompt_login(contexts: str, history: str, latest_chat: str, query: str) 
     """
     prompt_template = PromptTemplate(
         input_variables=["contexts", "history", "latest_chat", "query"],
-        template="""
+        template=
+        """
         You are an expert in login systems, providing ***accurate and detailed*** answers based on the available information.
 
         Strictly follow these guidelines:
@@ -90,6 +92,7 @@ def get_prompt_login(contexts: str, history: str, latest_chat: str, query: str) 
 #         contexts=contexts, history=history, latest_chat=latest_chat, query=query
 #     )
 
+
 def get_prompt_enrollment(contexts: str, history: str, latest_chat: str, query: str) -> str:
     """
     Generates a structured prompt to ensure the model provides a natural, context-aware response 
@@ -113,7 +116,7 @@ def get_prompt_enrollment(contexts: str, history: str, latest_chat: str, query: 
             - **DO NOT say "Based on the Context" or similar phrases**.
             - Integrate the relevant information into a **natural, fluent response** without explicitly calling out where it came from.
             - Ensure that your response **does not repeat verbatim** the language in the source material.
-            - **FORMAT** the response **INDEPENDENTLY** and make it **UNDERSTANDABLE** with **NO UNNECESSARY FONT CHANGES or HEDDINGS**.
+            - **USE LATEST CHAT OR HISTORY ONLY IF USER QUERY IS UNCLEAR**.
 
             ### BACKGROUND INFORMATION (Use this to answer the USER QUERY):
             {contexts}
@@ -144,8 +147,9 @@ def get_validation_prompt(response: str, query: str) -> str:
         """  
         You are an AI assistant validating an insurance response that exactly follows the below instructions.
 
-        - Check if the response is extremely irrelavant to the user query. Return **"I don't have enough information on that, Please contact the office or provide more details."**.
+        - Check if the response is extremely irrelavant to the user query. Return I don't have enough information on that, Please contact the office or provide more details.
         - If the response is relevant, return the response provided itself.
+        - If the response if only half relevant provide only the relevant part of the response.
         - Don't generate any additional explanations.
         
         **User Question:**  
@@ -181,8 +185,9 @@ def get_query_category(query: str) -> str:
     print(f"Formatted Prompt: {formatted_prompt}")
     return prompt_template.format(query=query)
 
-def get_summarize_prompt(data):
 
+def get_summarize_prompt(data):
+    
     """Takes in conversation history data and returns a formatted prompt."""
 
     prompt_template = PromptTemplate(
@@ -209,8 +214,8 @@ def get_format_text_prompt(text: str) -> str:
         template=
         """
           You are an AI responsible for formatting text.
-          Return text with proper spacing, consistent formatting, and a uniform font. 
-          Do not alter the context of the text.  
+          Return text with proper spacing and a uniform font. 
+          Remove any asking of follow-up questions.  
           
 
           **Unformatted text:**  
@@ -222,3 +227,30 @@ def get_format_text_prompt(text: str) -> str:
     text= text
     )
     return formatted_prompt
+
+def get_user_enrollment_status(query: str) -> str:
+    prompt_template = PromptTemplate(
+        input_variables=["query"],
+        template=
+        """
+        You are an AI assistant determining whether a user is enrolled in an insurance plan based on their query.
+        Classify the user into one of the following categories:
+        
+        - **enrolled** → If the query suggests the user already has an insurance plan.
+        - **new user** → If the query suggests the user is not yet enrolled or is seeking enrollment information.
+
+        Respond only with **"enrolled"** or **"new user"** without any additional explanation.
+
+        **Examples:**
+        - "How do I change my password?" → **enrolled**
+        - "How do I enroll?" → **new user**
+        - "How do I change my plan?" → **enrolled**
+        - "What plans are available?" → **new user**
+        - "How do I cancel my plan?" → **enrolled**
+        - "What different enrollment plans are available?" → **new user**
+
+        **User Query:** {query}  
+        **Response:** 
+        """
+    )
+    return prompt_template.format(query=query)
