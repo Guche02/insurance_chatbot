@@ -16,7 +16,7 @@ def main():
     #display chat history
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
-            st.write(message["content"])
+            st.text(message["content"])
             st.caption(f'{message["timestamp"].strftime("%Y-%m-%d %H:%M:%S")}')
 
     #get user input
@@ -32,7 +32,7 @@ def main():
         })
 
         with st.chat_message("user"):
-            st.write(user_input)
+            st.text(user_input)
             st.caption(f'{timestamp.strftime("%Y-%m-%d %H:%M:%S")}')
             
         if st.session_state.messages:
@@ -51,7 +51,7 @@ def main():
         })  
 
         with st.chat_message("assistant"):
-            st.write(bot_response)
+            st.text(bot_response)
             st.caption(f'{timestamp.strftime("%Y-%m-%d %H:%M:%S")}')
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 from chromadb import PersistentClient  # type: ignore
-from utils.prompt import get_prompt_login, get_validation_prompt, get_query_category, get_prompt_enrollment
+from utils.prompt import get_prompt_login, get_validation_prompt, get_query_category, get_prompt_enrollment,get_format_text_prompt
 from utils.llm import run_chat_login, run_chat_others, run_enrollment_chat
 from sentence_transformers import SentenceTransformer   # type: ignore
 from dotenv import load_dotenv # type: ignore
@@ -26,14 +26,15 @@ enrollment_collection = db.enrollment_chat_history
 def chatbot(question, oldest_timestamp):
     """Takes in user question and returns answer."""
     
+    #categorize the question
     category = run_chat_others(get_query_category(question))
-    print(f"Category: {category}")
+
     
     if category == "login":
       history_collection = login_collection
       response_function = run_chat_login
       vector_collection = login_collection_db
-      prompt_function = get_prompt_login
+      prompt_function = get_prompt_enrollment
       
     elif category == "enrollment":
         history_collection = enrollment_collection
@@ -44,11 +45,7 @@ def chatbot(question, oldest_timestamp):
     else:
         return "Error: Invalid category. Please provide a valid category."
 
-    print("History collection used: ", history_collection)
-    print("Vector collection used: ", vector_collection)
-
-    print("response function used: ", response_function)
-    
+    #get latest chat
     latest_chat = history_collection.find_one({"created_at": {"$gt": oldest_timestamp}},  sort=[("created_at", -1)])
     print(f"Latest chat: {latest_chat}")
     
@@ -57,61 +54,58 @@ def chatbot(question, oldest_timestamp):
     latest_chat_formatted = f"User: {latest_chat_question} AI: {latest_chat_answer}" if latest_chat else ""
     print(f"Latest chat formatted: {latest_chat_formatted}")
   
+    #combine lates chat and question for context retrival
     question_history = f"{question} {latest_chat_formatted}"
     print("Question history: ", question_history)
     
+    #get question embedding
     question_embedding = model.encode(question_history)
   
     #get context
     context = vector_collection.query(
         query_embeddings=question_embedding,
-        n_results=5,
-    )
-    print(f"Retrieved context: {context}")
+        n_results=3)
 
-    # context = list(set(context))
-    # Assuming context is the dictionary you've provided
+    #format context
     documents = context.get('documents', [])
-    
-    print(f"Retrieved documents: {documents}")
-    print(f"Type Retrieved documents: {type(documents)}")
-    print(f"Cleaned data len: {len(documents)}")
     flattened_doc=[item for sublist in documents for item in sublist]
-
-    print(f"Flattned Data: {flattened_doc}")
-    print(f"Flattned data len: {len(flattened_doc)}")
-
     context = list(set(flattened_doc))
     
-    print(f"Cleaned context: {context}")
-    print(f"Length clened context: {len(context)}")
-    
+    #get 3 latest document to create hstory summary
     latest_documents = list(
     history_collection.find({"created_at": {"$gt": oldest_timestamp}})
     .sort("created_at", -1) 
-    .limit(3)  
-)
-    print("Latest documents: ", latest_documents)
-
+    .limit(3)  )
+    
+    #create history summary
     history_summary = summarize(latest_documents)
-    print(f"Chat History Summary: {history_summary}\n")
+    
+    #create prompt
     prompt = prompt_function(context, history_summary,history_collection.find_one(
     {"created_at": {"$gt": oldest_timestamp}},  
     sort=[("created_at", -1)]  ), question)
     print(f"Final Prompt: {prompt}")
       
+    #get response
     response = response_function(prompt)
-    print(f"Initial Response: {response}")
+    
+    formatted_response = run_chat_others(get_format_text_prompt(response))
+    
+    #validate response
     validation_prompt = get_validation_prompt(response, question)
-    print(f"Validation prompt: {validation_prompt}")
     validation_result = run_chat_others(validation_prompt)
-    print(f"Final result: {validation_result}")
 
+
+    #save chat history
     history_collection.insert_one({
         "question": question,
         "answer": response,
         "created_at": datetime.utcnow()
     })
+    
+    
+    
+    #return validated prompt
     return validation_result
 
 # print(chatbot("how to login as an agent?", "Login"))

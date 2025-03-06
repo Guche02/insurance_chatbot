@@ -94,37 +94,34 @@ def get_prompt_enrollment(contexts: str, history: str, latest_chat: str, query: 
     """
     Generates a structured prompt to ensure the model provides a natural, context-aware response 
     without directly referencing source material.
-    
     :param contexts: str - Primary knowledge base information.
     :param history: str - Summary of past interactions.
     :param latest_chat: str - Most recent user interaction.
     :param query: str - User's current query.
     :return: str - Formatted prompt for generating a response.
     """
-    
     prompt_template = PromptTemplate(
         input_variables=["contexts", "history", "latest_chat", "query"],
         template=
-        
         """
             ### SYSTEM MESSAGE  
-            You are an **insurance enrollment expert**, and your task is to **answer the user's query** in a **clear and natural manner**. 
+            You are an  part of insurance company working as an **insurance enrollment expert**, and your task is to **answer the user's query in USER QUERY heading** in a **clear and natural manner**. 
 
             **IMPORTANT:**
             - **Do NOT** reference the source text (Context, History, or Latest Chat) directly in your response.
             - **Do NOT quote or copy-paste** content from the provided information.
             - **DO NOT say "Based on the Context" or similar phrases**.
             - Integrate the relevant information into a **natural, fluent response** without explicitly calling out where it came from.
-            - If the query **cannot be answered with the available information**, **honestly state** that the answer is unclear.
             - Ensure that your response **does not repeat verbatim** the language in the source material.
+            - **FORMAT** the response **INDEPENDENTLY** and make it **UNDERSTANDABLE** with **NO UNNECESSARY FONT CHANGES or HEDDINGS**.
 
-            ### BACKGROUND INFORMATION (Use this to answer the query):
+            ### BACKGROUND INFORMATION (Use this to answer the USER QUERY):
             {contexts}
 
-            ### LATEST USER INTERACTION:
+            ### LATEST USER INTERACTION (Use this SECONDARY):
             {latest_chat}
 
-            ### HISTORY SUMMARY (Use this if needed for additional context):
+            ### HISTORY SUMMARY (Use this TERTIARY):
             {history}
 
             ### USER QUERY:
@@ -203,4 +200,25 @@ def get_summarize_prompt(data):
 
     formatted_prompt = prompt_template.format(data=data)
 
+    return formatted_prompt
+
+
+def get_format_text_prompt(text: str) -> str:
+    prompt_template = PromptTemplate(
+        input_variables=["text"],
+        template=
+        """
+          You are an AI responsible for formatting text.
+          Return text with proper spacing, consistent formatting, and a uniform font. 
+          Do not alter the context of the text.  
+          
+
+          **Unformatted text:**  
+          {text}
+
+        """
+    )
+    formatted_prompt = prompt_template.format(
+    text= text
+    )
     return formatted_prompt
