@@ -1,9 +1,8 @@
 from langchain.prompts import PromptTemplate  # type: ignore
 
-def get_prompt_login(contexts: str, history: str, latest_chat: str, query: str) -> str:
-    
+def get_prompt_login(contexts: str, latest_chat: str, query: str) -> str: 
     """
-    The function returns formatted prompt to get answer to the user query.
+    The function returns a formatted prompt to generate a polite and human-like response.
     :param contexts: str
     :param history: str
     :param latest_chat: str
@@ -11,89 +10,61 @@ def get_prompt_login(contexts: str, history: str, latest_chat: str, query: str) 
     :return: str
     """
     prompt_template = PromptTemplate(
-        input_variables=["contexts", "history", "latest_chat", "query"],
+        input_variables=["contexts", "latest_chat", "query"],
         template=
         """
-        You are an expert in login systems, providing ***accurate and detailed*** answers based on the available information.
+        You are a friendly and knowledgeable expert in login systems. You communicate **politely, like a helpful human**, ensuring clarity and warmth in your responses.
 
-        Strictly follow these guidelines:
-        - Use **Context (Knowledge Base)** as the primary source to answer **User Query**.
-        - If the **User Query** cannot be answered using **Context**, refer to **History Summary**.
-        - If the answer is still unclear, consider **Latest Chat** for additional context.
-        - Do not use **History Summary** or **Latest Chat** if **Context** provides a complete answer. (!!!THIS IS IMPORTANT!!!)
-
-        - provide a detailed and accurate asnwer based on above guidelines.
-        - Do not generate any additional explanation.
+        **Guidelines for Your Response:**
+        - Provide a **clear and general answer** using the **Context (Knowledge Base)** as the primary source.
+        - If the **User Query** cannot be fully answered using **Context**, refer to **past conversations** for additional details.
+        - If needed, use **Latest Chat** to provide further clarification.
+        - Keep responses **concise, helpful, and human-like** while maintaining accuracy.
+        - End with a polite closing (e.g., "Let me know if you need more help!").
 
         **Context (Knowledge Base - Primary Source):**
         {contexts}
 
-        **History Summary (Secondary Source - Past Conversations Overview):**
-        {history}
-
-        **Latest Chat (Tertiary Source - Most Recent User Interaction):**
+        **Past conversations (Tertiary Source - Most Recent User Interaction):**
         {latest_chat}
 
-        **User Query (Answer This Based on the Given Sources):**
+        **User Query:**
         {query} 
         """
     )
     
     formatted_prompt = prompt_template.format(
-        contexts=contexts, history=history, latest_chat=latest_chat, query=query
+        contexts=contexts, latest_chat=latest_chat, query=query
     )
     return formatted_prompt
 
+def query_reformulation_prompt(query: str, history: str) -> str:
 
-# def get_prompt_enrollment(contexts: str, history: str, latest_chat: str, query: str) -> str:
-#     """
-#     Generates a structured prompt to answer a user's query regarding insurance enrollment.
-
-#     :param contexts: str - Primary knowledge base information.
-#     :param history: str - Summary of past interactions.
-#     :param latest_chat: str - Most recent user interaction.
-#     :param query: str - User's current query.
-#     :return: str - Formatted prompt for generating a response.
-#     """
+    query_reformulation_prompt = PromptTemplate(
+    input_variables=["history", "query"],
+    template="""
+    You are an intelligent assistant that refines user queries to make them clear, coherent, and contextually relevant.
     
-#     prompt_template = PromptTemplate(
-#         input_variables=["contexts", "history", "latest_chat", "query"],
-#         template=
-#         """
-#             ### SYSTEM MESSAGE  
-#             You are an expert in **insurance enrollment** chatbot that provides **accurate, clear, and direct** responses to help user.
-
-#             ### GUIDELINES  
-#             1. Use **only the information provided** to answer the user's query.  
-#             2. **DO NOT** say "Based on the Context" or "mention in context" reference the sources directly.  
-#             3. **Rephrase and integrate** the information naturally—avoid copying text verbatim.  
-#             4. If the query **cannot** be answered with certainty, say so rather than making assumptions.  
-#             5. **DO NOT** use any special formatting (e.g., bold, italics, hyperlinks) from the source.  
-
-
-#             ---
-
-#             ### BACKGROUND INFORMATION (Use This to Answer the Query) 
-#             {contexts}  
-
-#             ---
-
-#             ### LATEST USER INTERACTION  
-#             {latest_chat}   
-
-#             ---
-
-#             ### USER QUERY  (Provide a natural, well-structured response here.)
-#             {query}  
-#         """
-#     )
+    **Instructions:**
+    - Carefully analyze the previous conversation history.
+    - Understand the intent behind the current query.
+    - Reformulate the query in one sentence to make it more precise, removing ambiguities.
+    - Ensure the reformulated query maintains the original meaning while making it clearer.
     
-#     return prompt_template.format(
-#         contexts=contexts, history=history, latest_chat=latest_chat, query=query
-#     )
+    **Conversation History:**
+    {history}
+    
+    **User's Current Query:**
+    {query}
+    
+    **Reformulated Query:**
+    """
+)
+    return query_reformulation_prompt.format(
+        history=history, query=query
+    )
 
-
-def get_prompt_enrollment(contexts: str, history: str, latest_chat: str, query: str) -> str:
+def get_prompt_enrollment(contexts: str, latest_chat: str, query: str) -> str:
     """
     Generates a structured prompt to ensure the model provides a natural, context-aware response 
     without directly referencing source material.
@@ -136,9 +107,8 @@ def get_prompt_enrollment(contexts: str, history: str, latest_chat: str, query: 
     )
 
     return prompt_template.format(
-        contexts=contexts, history=history, latest_chat=latest_chat, query=query
+        contexts=contexts, latest_chat=latest_chat, query=query
     )
-
 
 def get_validation_prompt(response: str, query: str) -> str:
     prompt_template = PromptTemplate(
@@ -185,7 +155,6 @@ def get_query_category(query: str) -> str:
     print(f"Formatted Prompt: {formatted_prompt}")
     return prompt_template.format(query=query)
 
-
 def get_summarize_prompt(data):
     
     """Takes in conversation history data and returns a formatted prompt."""
@@ -204,9 +173,7 @@ def get_summarize_prompt(data):
     )
 
     formatted_prompt = prompt_template.format(data=data)
-
     return formatted_prompt
-
 
 def get_format_text_prompt(text: str) -> str:
     prompt_template = PromptTemplate(
