@@ -1,4 +1,4 @@
-from utils.prompt import get_validation_prompt, get_query_category, get_prompt_enrollment, get_user_enrollment_status,query_reformulation_prompt
+from utils.prompt import get_validation_prompt, get_query_category, get_prompt_enrollment, get_user_enrollment_status,query_reformulation_prompt, get_formatting_prompt
 from utils.llm import run_chat_login, run_chat_others, run_enrollment_chat
 from dotenv import load_dotenv 
 from datetime import datetime
@@ -20,7 +20,7 @@ enrollment_collection_db = Chroma(client=client, collection_name="enrollement_kn
 #print(collection.count())
 
 
-def chatbot(question, oldest_timestamp):
+def chatbot(question):
     """Takes in user question and returns answer."""
     
     #categorize the question
@@ -73,18 +73,17 @@ def chatbot(question, oldest_timestamp):
 	"question": question
     }) 
 
-
     #validate response
     validation_prompt = get_validation_prompt(response, question)
     validation_result = run_chat_others(validation_prompt)
     
-    print("Validation result: ", validation_result)
+    print("Validation result:",validation_result.strip(),"end")
 
     #check is user is enrolled
     enrollment_status = run_chat_others(get_user_enrollment_status(question))
     print("Enrollment status: ", enrollment_status)
     if enrollment_status == "new user":
-        validation_result = validation_result + "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan."
+        validation_result = validation_result.strip('"') + "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan."
 
     #save chat history 
     add_collection(category,{
@@ -93,7 +92,10 @@ def chatbot(question, oldest_timestamp):
         "created_at": datetime.utcnow()}
     )
     
-    return validation_result 
+    formatted_prompt = get_formatting_prompt(validation_result)
+    formatted_result = run_chat_others(formatted_prompt)
+    
+    return formatted_result 
 
 # print(chatbot("how to login as an agent?", "Login"))
 # print(chatbot("And as a user?", "login"))

@@ -102,23 +102,26 @@ def get_validation_prompt(response: str, query: str) -> str:
     prompt_template = PromptTemplate(
         input_variables=["response", "question"],
         template=
-        """  
+    """  
         You are an AI assistant validating an insurance response that exactly follows the below instructions.
 
-        - Check if the response is extremely irrelavant to the user query. Return I don't have enough information on that, Please contact the office or provide more details.
-        - If the response is relevant, return the response provided itself.
-        - If the response if only half relevant provide only the relevant part of the response.
-        - Don't generate any additional explanations.
+        1. If the response is completely irrelevant to the user's query, return: "I don't have enough information on that. Please contact the office or provide more details."
+        2. If the response is relevant, return the response exactly as provided.
+        3. If the response is partially relevant, return only the relevant portion of the response.
+        4. If the response assumes something about the user, provide a generalized version of the response.
+        5. If the user asks "How do I enroll?" or "How do I enroll in a plan?" or any variations of this question return an empty string.
+        6. Avoid adding any additional text, such as “feel free to ask more questions”,"I can provide you this" etc.
+        7. Do not offer explanations or generate extra content.
         
         **User Question:**  
-        {query}  
+        {question}  
 
         **Response Provided:**  
         {response}  
-        """
+    """
     )
 
-    formatted_prompt = prompt_template.format(query=query, response=response)
+    formatted_prompt = prompt_template.format(question=query, response=response)
     print(f"Formatted Prompt: {formatted_prompt}")
     return formatted_prompt
 
@@ -171,7 +174,6 @@ def get_format_text_prompt(text: str) -> str:
           Return text with proper spacing and a uniform font. 
           Remove any asking of follow-up questions.  
           
-
           **Unformatted text:**  
           {text}
 
@@ -207,3 +209,19 @@ def get_user_enrollment_status(query: str) -> str:
     )
     formatted_prompt = prompt_template.format(query=query)
     return formatted_prompt
+
+def get_formatting_prompt(response: str) -> str:
+    prompt_template = PromptTemplate(
+        input_variables=["response"],
+        template=
+        """
+        Please revise the response to make it more professional and straignt to the point.
+        - Don't generate any additional explanations.
+        
+        **Normal Response:** {response}  
+        **Professional Response:** 
+        """
+    )
+    formatted_prompt = prompt_template.format(response=response)
+    return formatted_prompt
+

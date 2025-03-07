@@ -35,12 +35,7 @@ def main():
             st.text(user_input)
             st.caption(f'{timestamp.strftime("%Y-%m-%d %H:%M:%S")}')
             
-        if st.session_state.messages:
-            oldest_timestamp = st.session_state.messages[0]["timestamp"]
-        else:
-            oldest_timestamp = datetime.utcnow() 
-
-        bot_response = chatbot(user_input,oldest_timestamp)
+        bot_response = chatbot(user_input)
 
         timestamp = datetime.utcnow()
 

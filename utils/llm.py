@@ -86,5 +86,5 @@ def run_enrollment_chat():
     return llm_enrollment 
 
 def run_chat_others(prompt):
-    return run_chat_groq(prompt, llm_enrollment)
+    return run_chat_groq(prompt, llm_enrollment)  # Uses Llama-3.1-8B
 
