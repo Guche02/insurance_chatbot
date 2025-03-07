@@ -9,6 +9,13 @@ dotenv.load_dotenv()
 api_key = os.getenv("MISTRAL_API_KEY")
 model_mistral = "ministral-3b-latest"
 
+llm_login = ChatGroq(
+    model="llama-3.1-8b-instant",
+    temperature=0,
+    max_retries=3,
+)
+
+
 llm_enrollment = ChatGroq(
     model="llama-3.1-8b-instant",
     temperature=0,
@@ -21,7 +28,7 @@ llm_others = ChatGroq(
     max_retries=3,
 )
 
-def llm_login(prompt):
+def run_llm_login(prompt):
     """Handles login-related chat using Mistral-3B."""
     try:
         client_mistral = Mistral(api_key=api_key)
@@ -72,12 +79,12 @@ def handle_http_error(e):
         return f"Error: {e.response.status_code} - {e.response.text}"
 
 
-def run_chat_login(prompt):
-    return run_chat_groq(prompt, llm_enrollment)   # Uses Mistral-3B
+def run_chat_login():
+    return llm_login
 
-def run_enrollment_chat(prompt):
-    return run_chat_groq(prompt, llm_enrollment) 
+def run_enrollment_chat():
+    return llm_enrollment 
 
 def run_chat_others(prompt):
-    return run_chat_groq(prompt, llm_enrollment)  # Uses Llama-3.1-8B
+    return run_chat_groq(prompt, llm_enrollment)
 

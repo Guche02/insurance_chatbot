@@ -1,6 +1,6 @@
 from langchain.prompts import PromptTemplate  # type: ignore
 
-def get_prompt_login(contexts: str, latest_chat: str, query: str) -> str: 
+def get_prompt_login() : 
     """
     The function returns a formatted prompt to generate a polite and human-like response.
     :param contexts: str
@@ -10,7 +10,7 @@ def get_prompt_login(contexts: str, latest_chat: str, query: str) -> str:
     :return: str
     """
     prompt_template = PromptTemplate(
-        input_variables=["contexts", "latest_chat", "query"],
+        input_variables=["context", "query"],
         template=
         """
         You are a friendly and knowledgeable expert in login systems. You communicate **politely, like a helpful human**, ensuring clarity and warmth in your responses.
@@ -23,25 +23,23 @@ def get_prompt_login(contexts: str, latest_chat: str, query: str) -> str:
         - End with a polite closing (e.g., "Let me know if you need more help!").
 
         **Context (Knowledge Base - Primary Source):**
-        {contexts}
+        {context}
 
-        **Past conversations (Tertiary Source - Most Recent User Interaction):**
-        {latest_chat}
 
         **User Query:**
         {query} 
         """
     )
     
-    formatted_prompt = prompt_template.format(
-        contexts=contexts, latest_chat=latest_chat, query=query
-    )
-    return formatted_prompt
+    # formatted_prompt = prompt_template.format(
+    #     contexts=contexts, latest_chat=latest_chat, query=query
+    # )
+    return prompt_template
 
-def query_reformulation_prompt(query: str, history: str) -> str:
+def query_reformulation_prompt() :
 
     query_reformulation_prompt = PromptTemplate(
-    input_variables=["history", "query"],
+    input_variables=["memory", "question"],
     template="""
     You are an intelligent assistant that refines user queries to make them clear, coherent, and contextually relevant.
     
@@ -52,19 +50,17 @@ def query_reformulation_prompt(query: str, history: str) -> str:
     - Ensure the reformulated query maintains the original meaning while making it clearer.
     
     **Conversation History:**
-    {history}
+    {memory}
     
     **User's Current Query:**
-    {query}
+    {question}
     
     **Reformulated Query:**
     """
 )
-    return query_reformulation_prompt.format(
-        history=history, query=query
-    )
+    return query_reformulation_prompt
 
-def get_prompt_enrollment(contexts: str, latest_chat: str, query: str) -> str:
+def get_prompt_enrollment() :
     """
     Generates a structured prompt to ensure the model provides a natural, context-aware response 
     without directly referencing source material.
@@ -75,7 +71,7 @@ def get_prompt_enrollment(contexts: str, latest_chat: str, query: str) -> str:
     :return: str - Formatted prompt for generating a response.
     """
     prompt_template = PromptTemplate(
-        input_variables=["contexts", "history", "latest_chat", "query"],
+        input_variables=["context",  "question"],
         template=
         """
             ### SYSTEM MESSAGE  
@@ -90,29 +86,21 @@ def get_prompt_enrollment(contexts: str, latest_chat: str, query: str) -> str:
             - **USE LATEST CHAT OR HISTORY ONLY IF USER QUERY IS UNCLEAR**.
 
             ### BACKGROUND INFORMATION (Use this to answer the USER QUERY):
-            {contexts}
-
-            ### LATEST USER INTERACTION (Use this SECONDARY):
-            {latest_chat}
-
-            ### HISTORY SUMMARY (Use this TERTIARY):
-            {history}
+            {context}
 
             ### USER QUERY:
-            {query}
+            {question}
 
             ### RESPONSE:
             (Provide a concise, clear response. Integrate information without repeating source text or referring to the context explicitly.)
         """
     )
 
-    return prompt_template.format(
-        contexts=contexts, latest_chat=latest_chat, query=query
-    )
+    return prompt_template
 
 def get_validation_prompt(response: str, query: str) -> str:
     prompt_template = PromptTemplate(
-        input_variables=["response", "query"],
+        input_variables=["response", "question"],
         template=
         """  
         You are an AI assistant validating an insurance response that exactly follows the below instructions.
@@ -132,8 +120,7 @@ def get_validation_prompt(response: str, query: str) -> str:
 
     formatted_prompt = prompt_template.format(query=query, response=response)
     print(f"Formatted Prompt: {formatted_prompt}")
-    return prompt_template.format(response=response, query=query)
-
+    return formatted_prompt
 
 def get_query_category(query: str) -> str:
     prompt_template = PromptTemplate(
@@ -153,7 +140,7 @@ def get_query_category(query: str) -> str:
     
     formatted_prompt = prompt_template.format(query=query)
     print(f"Formatted Prompt: {formatted_prompt}")
-    return prompt_template.format(query=query)
+    return formatted_prompt
 
 def get_summarize_prompt(data):
     
@@ -172,7 +159,7 @@ def get_summarize_prompt(data):
         """
     )
 
-    formatted_prompt = prompt_template.format(data=data)
+    formatted_prompt = prompt_template
     return formatted_prompt
 
 def get_format_text_prompt(text: str) -> str:
@@ -190,10 +177,8 @@ def get_format_text_prompt(text: str) -> str:
 
         """
     )
-    formatted_prompt = prompt_template.format(
-    text= text
-    )
-    return formatted_prompt
+
+    return prompt_template
 
 def get_user_enrollment_status(query: str) -> str:
     prompt_template = PromptTemplate(
@@ -220,4 +205,5 @@ def get_user_enrollment_status(query: str) -> str:
         **Response:** 
         """
     )
-    return prompt_template.format(query=query)
+    formatted_prompt = prompt_template.format(query=query)
+    return formatted_prompt
