@@ -103,21 +103,23 @@ def get_validation_prompt(response: str, query: str) -> str:
         input_variables=["response", "question"],
         template=
     """  
-        You are an AI assistant validating an insurance response that exactly follows the below instructions.
+        You are an AI assistant responsible for validating and formatting an insurance response according to the following instructions:
 
-        1. If the response is completely irrelevant to the user's query, return: "I don't have enough information on that. Please contact the office or provide more details."
-        2. If the response is relevant, return the response exactly as provided.
-        3. If the response is partially relevant, return only the relevant portion of the response.
-        4. If the response assumes something about the user, provide a generalized version of the response.
-        5. If the user asks "How do I enroll?" or "How do I enroll in a plan?" or any variations of this question return an empty string.
-        6. Avoid adding any additional text, such as “feel free to ask more questions”,"I can provide you this" etc.
-        7. Do not offer explanations or generate extra content.
-        
+        1. If the response is completely irrelevant to the user’s query, return: "I don't have enough information on that. Please contact the office or provide more details."
+        3. If the response is partially relevant, only include the relevant part of the response.
+        4. If the response makes assumptions about the user, provide a generalized version.
+        5. If the user asks "How do I enroll?" or any variations of this question, return an empty string.
+        6. Remove/Don't include extra text, such as “feel free to ask more questions,” or “I can provide you this.”
+        7. Do not request additional information.
+        8. Ensure responses feel natural and directly address the user's query.
+        9. Do not offer explanations or generate additional content.
+
         **User Question:**  
-        {question}  
+        {question}
 
         **Response Provided:**  
-        {response}  
+        {response}
+ 
     """
     )
 
@@ -215,11 +217,11 @@ def get_formatting_prompt(response: str) -> str:
         input_variables=["response"],
         template=
         """
-        Please revise the response to make it more professional and straignt to the point.
+        Please revise the response and return a more professional and straignt to the point version.
+        
         - Don't generate any additional explanations.
         
-        **Normal Response:** {response}  
-        **Professional Response:** 
+        {response}      
         """
     )
     formatted_prompt = prompt_template.format(response=response)

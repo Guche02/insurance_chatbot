@@ -81,10 +81,12 @@ def chatbot(question):
 
     #check is user is enrolled
     enrollment_status = run_chat_others(get_user_enrollment_status(question))
-    print("Enrollment status: ", enrollment_status)
-    if enrollment_status == "new user":
-        validation_result = validation_result.strip('"') + "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan."
 
+    print("Enrollment status: ", enrollment_status)
+    if "I don't have enough information" in validation_result and enrollment_status == "new user":
+       pass 
+    elif enrollment_status == "new user" :
+        validation_result = validation_result.strip('"') + "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan."
     #save chat history 
     add_collection(category,{
         "question": question,
