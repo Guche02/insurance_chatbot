@@ -21,9 +21,9 @@ max_token_limit=500
 
 embedding_function = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
 
-client = chromadb.PersistentClient(path="insurance_vectordb/")
-login_collection_db = Chroma(client=client, collection_name="enrollement_knowlage_base", embedding_function=embedding_function)
-enrollment_collection_db = Chroma(client=client, collection_name="enrollement_knowlage_base", embedding_function=embedding_function)
+client = chromadb.PersistentClient(path="insurance_new")
+login_collection_db = Chroma(client=client, collection_name="knowledge_base", embedding_function=embedding_function)
+enrollment_collection_db = Chroma(client=client, collection_name="knowledge_base", embedding_function=embedding_function)
 #print(collection.count())
 
 
