@@ -10,7 +10,7 @@ def get_prompt_login() :
     :return: str
     """
     prompt_template = PromptTemplate(
-        input_variables=["context", "query"],
+        input_variables=["context", "question"],
         template=
         """
         You are a friendly and knowledgeable expert in login systems. You communicate **politely, like a helpful human**, ensuring clarity and warmth in your responses.
@@ -27,7 +27,7 @@ def get_prompt_login() :
 
 
         **User Query:**
-        {query} 
+        {question} 
         """
     )
     
@@ -36,10 +36,10 @@ def get_prompt_login() :
     # )
     return prompt_template
 
-def query_reformulation_prompt() :
+def query_reformulation_prompt(): 
 
     query_reformulation_prompt = PromptTemplate(
-    input_variables=["memory", "question"],
+    input_variables=["chat_history", "question"],
     template="""
     You are an intelligent assistant that refines user queries to make them clear, coherent, and contextually relevant.
     
@@ -51,7 +51,7 @@ def query_reformulation_prompt() :
     - Don't generate any additional explanations other than the reformulated query.
     
     **Conversation History:**
-    {memory}
+    {chat_history}
     
     **User's Current Query:**
     {question}

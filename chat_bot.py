@@ -1,5 +1,5 @@
 from utils.prompt import get_validation_prompt, get_query_category, get_prompt_enrollment, get_format_text_prompt,query_reformulation_prompt, get_formatting_prompt
-from utils.llm import run_chat_login, run_chat_others, run_enrollment_chat
+from utils.llm import run_chat_login, run_chat_others, run_enrollment_chat, llm_others, llm_login,llm_enrollment
 from dotenv import load_dotenv 
 from datetime import datetime
 from utils.mongodb import  add_collection
@@ -10,7 +10,14 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains import ConversationalRetrievalChain, LLMChain,StuffDocumentsChain
 
 load_dotenv()
-
+    
+memory = ConversationTokenBufferMemory(
+llm=llm_others,  
+memory_key="chat_history",
+return_messages=True,
+max_token_limit=500 
+)
+    
 
 embedding_function = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
 
@@ -27,13 +34,15 @@ def chatbot(question):
     category = run_chat_others(get_query_category(question))
 
     if category == "login":
-      response_function = run_chat_login()
+      response_function = run_chat_login
       vector_collection = login_collection_db
+      llm_function = llm_login
       prompt_function = get_prompt_enrollment()
       
     elif category == "enrollment":
-        response_function = run_enrollment_chat()
+        response_function = run_enrollment_chat
         vector_collection = enrollment_collection_db
+        llm_function = llm_enrollment
         prompt_function = get_prompt_enrollment()
         
     else:
@@ -42,7 +51,7 @@ def chatbot(question):
     #chain
     
     #chain that takes the user question and main prompt function
-    llm_chain = LLMChain(llm=response_function, prompt=prompt_function)
+    llm_chain = LLMChain(llm=llm_function, prompt=prompt_function)
     
     # StuffDocumentsChain to process the retrieved documents and the user question
     combine_docs_chain = StuffDocumentsChain(
@@ -50,15 +59,8 @@ def chatbot(question):
         document_variable_name="context"  
     )
         
-    question_generator_chain = LLMChain(llm=response_function, prompt=query_reformulation_prompt())
-    
-    memory = ConversationTokenBufferMemory(
-    llm=response_function,  
-    memory_key="chat_history",
-    return_messages=True,
-    max_token_limit=500 
-    )
-    
+    question_generator_chain = LLMChain(llm=llm_function, prompt=query_reformulation_prompt())
+
     retriever = vector_collection.as_retriever()
     
     # ConversationalRetrievalChain, combining everything
@@ -69,14 +71,41 @@ def chatbot(question):
         memory=memory  
     )
     
-    response = chain.invoke({ 
-	"question": question
-    }) 
+    memory_output = memory.load_memory_variables({})
+    print("\n🔹 Memory Output:")
+    print(memory_output)
     
-    print("Response:",response['answer'])
+    chat_list = []
+
+    # Iterate through the chat history to separate Human and AI messages
+    for i in range(0, len(memory_output['chat_history']), 2):
+        human_message = memory_output['chat_history'][i].content
+        ai_message = memory_output['chat_history'][i+1].content if i+1 < len(memory_output['chat_history']) else None
+        if ai_message:
+            chat_list.append({
+                'human': human_message,
+                'ai': ai_message
+            })
+
+    # Debug print the resulting list
+    print("Chat History as List of Key-Value Pairs", chat_list)
+        
+    generated_question = question_generator_chain.run({"question": question, "chat_history": chat_list})
+    print("\n🔹 Generated Question:")
+    print(generated_question)
+    
+    retrieved_docs = retriever.get_relevant_documents(generated_question)
+    print("\n🔹 Retrieved Documents:")
+    
+    formatted_prompt = prompt_function.format(question=generated_question, context=retrieved_docs['content'])
+    response = response_function(formatted_prompt)
+
+    
+    print("Response:",response)
+    
 
     #validate response
-    validation_prompt = get_validation_prompt(response['answer'], question)
+    validation_prompt = get_validation_prompt(response, generated_question)
     validation_result = run_chat_others(validation_prompt)
     print("Validation result:",validation_result.strip(),"end")
     
@@ -96,6 +125,8 @@ def chatbot(question):
     tone_formatting = get_formatting_prompt(formatted_result)
     final = run_chat_others(tone_formatting)
     print("Final result:",final.strip())
+    
+    memory.save_context({"input": question},{"output": final})
     
         #save chat history 
     add_collection(category,{

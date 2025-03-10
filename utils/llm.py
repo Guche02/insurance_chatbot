@@ -79,11 +79,11 @@ def handle_http_error(e):
         return f"Error: {e.response.status_code} - {e.response.text}"
 
 
-def run_chat_login():
-    return llm_login
+def run_chat_login(prompt):
+    return llm_login.invoke(prompt)
 
-def run_enrollment_chat():
-    return llm_enrollment 
+def run_enrollment_chat(prompt):
+    return llm_enrollment.invoke(prompt)
 
 def run_chat_others(prompt):
     return run_chat_groq(prompt, llm_enrollment)  # Uses Llama-3.1-8B
