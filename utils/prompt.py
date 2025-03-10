@@ -223,7 +223,9 @@ def get_formatting_prompt(response: str) -> str:
         input_variables=["response"],
         template=
         """
-        Please revise the response and return a more professional and straignt to the point version.
+        Please revise the response and return a more professional and straignt to the point version. 
+        - Ensure that the text size is normal and consistent.
+
         
         - Don't generate any additional explanations.
         
