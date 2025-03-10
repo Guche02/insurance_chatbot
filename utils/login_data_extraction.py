@@ -11,8 +11,8 @@ def filter_relevant_chunks(chunks):
     return relevant_chunks
 
 def store_in_vector_db(chunks):
-    client = chromadb.PersistentClient(path="insurance_vectordb/")
-    collection = client.get_or_create_collection(name="login_knowlage_base")
+    client = chromadb.PersistentClient(path="insurance_new")
+    collection = client.get_collection(name="knowledge_base")
     
     for i, chunk in enumerate(chunks):
         embedding = model.encode(chunk).tolist()

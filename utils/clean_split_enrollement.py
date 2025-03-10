@@ -2,7 +2,7 @@ import PyPDF2
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_experimental.text_splitter import SemanticChunker
 import re
-from prompt import get_format_text_prompt
+from prompt import get_format_text_prompt, get_formatting_prompt
 from llm import run_chat_others
 #semantic text splitter used for splitting bronze plan text into chunks
 hf_embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -11,7 +11,7 @@ text_splitter = SemanticChunker(
 )
 
 
-def get_enrollment_conversations(pdf_path="D:/insurance-chatbot/data/processed_data.pdf"):
+def get_enrollment_conversations(pdf_path="D:\\Internship\\insurance_chatbot\\data\\processed_data.pdf"):
     """ 
     This function extracts conversations from a PDF, splits them into chunks,
     and filters out conversations related to enrollment.
@@ -57,7 +57,7 @@ def get_enrollment_conversations(pdf_path="D:/insurance-chatbot/data/processed_d
 def get_split_bronze_plan():
   processed_chunks = []  
 
-  with open("D:\\insurance-chatbot\\data\\bronze_plan.pdf", "rb") as file:
+  with open("D:\\Internship\\insurance_chatbot\\data\\bronze_plan.pdf", "rb") as file:
       reader = PyPDF2.PdfReader(file)
 
       for i,page in enumerate(reader.pages):
@@ -70,7 +70,7 @@ def get_split_bronze_plan():
 
               chunks = text_splitter.split_text(remaining_text)
               modified_chunks = [f"{first_two}\n{chunk}" for chunk in chunks]  
-              run_chat_others(get_format_text_prompt(modified_chunks))
+              run_chat_others(get_formatting_prompt(modified_chunks))
               processed_chunks.extend(modified_chunks) 
   return processed_chunks
 
