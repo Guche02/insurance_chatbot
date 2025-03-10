@@ -48,6 +48,7 @@ def query_reformulation_prompt() :
     - Understand the intent behind the current query.
     - Reformulate the query in one sentence to make it more precise, removing ambiguities.
     - Ensure the reformulated query maintains the original meaning while making it clearer.
+    - Don't generate any additional explanations other than the reformulated query.
     
     **Conversation History:**
     {memory}
@@ -84,14 +85,15 @@ def get_prompt_enrollment() :
             - Integrate the relevant information into a **natural, fluent response** without explicitly calling out where it came from.
             - Ensure that your response **does not repeat verbatim** the language in the source material.
             - **USE LATEST CHAT OR HISTORY ONLY IF USER QUERY IS UNCLEAR**.
+            - Don't generate any additional explanations other than the response.
 
-            ### BACKGROUND INFORMATION (Use this to answer the USER QUERY):
+            BACKGROUND INFORMATION (Use this to answer the USER QUERY):
             {context}
 
-            ### USER QUERY:
+            USER QUERY:
             {question}
 
-            ### RESPONSE:
+            RESPONSE:
             (Provide a concise, clear response. Integrate information without repeating source text or referring to the context explicitly.)
         """
     )
@@ -106,13 +108,7 @@ def get_validation_prompt(response: str, query: str) -> str:
         You are an AI assistant responsible for validating and formatting an insurance response according to the following instructions:
 
         1. If the response is completely irrelevant to the user’s query, return: "I don't have enough information on that. Please contact the office or provide more details."
-        3. If the response is partially relevant, only include the relevant part of the response.
-        4. If the response makes assumptions about the user, provide a generalized version.
-        5. If the user asks "How do I enroll?" or any variations of this question, return an empty string.
-        6. Remove/Don't include extra text, such as “feel free to ask more questions,” or “I can provide you this.”
-        7. Do not request additional information.
-        8. Ensure responses feel natural and directly address the user's query.
-        9. Do not offer explanations or generate additional content.
+
 
         **User Question:**  
         {question}
@@ -167,22 +163,32 @@ def get_summarize_prompt(data):
     formatted_prompt = prompt_template
     return formatted_prompt
 
-def get_format_text_prompt(text: str) -> str:
+def get_format_text_prompt(query: str, response:str) -> str:
     prompt_template = PromptTemplate(
-        input_variables=["text"],
+        input_variables=["query","response"],
         template=
         """
-          You are an AI responsible for formatting text.
-          Return text with proper spacing and a uniform font. 
-          Remove any asking of follow-up questions.  
+          - You are an AI responsible for formatting text AI reponses following below guidelines also consider user's question when necessary:
           
-          **Unformatted text:**  
-          {text}
+          1. Make the reponse generalized without asumming the user's situation.
+          2. If the user asks questions related to plan enrollment, return "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan.".
+          3. If question want to report a issue or has a issue return "\nGo to the website https://qa-tickets.purenroll.com/ to report any issue.".
+          4. Remove/Don't include extra text, such as “feel free to ask more questions”.
+          5. Do not request additional information.
+          6. Ensure responses feel natural and directly address the user's query.
+          7. Do not offer explanations or generate additional content. ()
+          
+          **User Query:**  
+          {query}
+          
+          **AI Response:**  
+          {response}
 
         """
     )
+    formatted_prompt = prompt_template.format(query=query, response=response)
+    return formatted_prompt
 
-    return prompt_template
 
 def get_user_enrollment_status(query: str) -> str:
     prompt_template = PromptTemplate(

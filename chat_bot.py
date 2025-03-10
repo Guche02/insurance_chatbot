@@ -1,4 +1,4 @@
-from utils.prompt import get_validation_prompt, get_query_category, get_prompt_enrollment, get_user_enrollment_status,query_reformulation_prompt, get_formatting_prompt
+from utils.prompt import get_validation_prompt, get_query_category, get_prompt_enrollment, get_format_text_prompt,query_reformulation_prompt, get_formatting_prompt
 from utils.llm import run_chat_login, run_chat_others, run_enrollment_chat
 from dotenv import load_dotenv 
 from datetime import datetime
@@ -72,32 +72,39 @@ def chatbot(question):
     response = chain.invoke({ 
 	"question": question
     }) 
+    
+    print("Response:",response['answer'])
 
     #validate response
-    validation_prompt = get_validation_prompt(response, question)
+    validation_prompt = get_validation_prompt(response['answer'], question)
     validation_result = run_chat_others(validation_prompt)
-    
     print("Validation result:",validation_result.strip(),"end")
+    
+    formatting_prompt = get_format_text_prompt(question,validation_result)
+    formatted_result = run_chat_others(formatting_prompt)
+    print("Formatted result:",formatted_result.strip())
+    
+    # #check is user is enrolled
+    # enrollment_status = run_chat_others(get_user_enrollment_status(question))
 
-    #check is user is enrolled
-    enrollment_status = run_chat_others(get_user_enrollment_status(question))
-
-    print("Enrollment status: ", enrollment_status)
-    if "I don't have enough information" in validation_result and enrollment_status == "new user":
-       pass 
-    elif enrollment_status == "new user" :
-        validation_result = validation_result.strip('"') + "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan."
-    #save chat history 
+    # print("Enrollment status: ", enrollment_status)
+    # if "I don't have enough information" in validation_result and enrollment_status == "new user":
+    #    pass 
+    # elif enrollment_status == "new user" :
+    #     validation_result = validation_result.strip('"') + "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan."
+    
+    tone_formatting = get_formatting_prompt(formatted_result)
+    final = run_chat_others(tone_formatting)
+    print("Final result:",final.strip())
+    
+        #save chat history 
     add_collection(category,{
         "question": question,
-        "answer": validation_result,
+        "answer": final,
         "created_at": datetime.utcnow()}
     )
     
-    formatted_prompt = get_formatting_prompt(validation_result)
-    formatted_result = run_chat_others(formatted_prompt)
-    
-    return formatted_result 
+    return final 
 
 # print(chatbot("how to login as an agent?", "Login"))
 # print(chatbot("And as a user?", "login"))
