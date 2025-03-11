@@ -1,4 +1,4 @@
-from utils.prompt import get_validation_prompt, get_query_category, get_prompt_enrollment, get_format_text_prompt,query_reformulation_prompt, get_formatting_prompt
+from utils.prompt import get_validation_prompt, get_query_category, get_prompt_enrollment, get_format_text_prompt,query_reformulation_prompt, get_formatting_and_validation_prompt
 from utils.llm import run_chat_login, run_chat_others, run_enrollment_chat, llm_others, llm_login,llm_enrollment
 from dotenv import load_dotenv 
 from datetime import datetime
@@ -30,7 +30,6 @@ enrollment_collection_db = Chroma(client=client, collection_name="knowledge_base
 def chatbot(question):
     """Takes in user question and returns answer."""
     
-    #categorize the question
     category = run_chat_others(get_query_category(question))
 
     if category == "login":
@@ -77,19 +76,21 @@ def chatbot(question):
     
     chat_list = []
 
-    # Iterate through the chat history to separate Human and AI messages
-    for i in range(0, len(memory_output['chat_history']), 2):
-        human_message = memory_output['chat_history'][i].content
-        ai_message = memory_output['chat_history'][i+1].content if i+1 < len(memory_output['chat_history']) else None
-        if ai_message:
-            chat_list.append({
-                'human': human_message,
-                'ai': ai_message
-            })
+    # Ensure there are at least two messages in chat history
+    if len(memory_output['chat_history']) >= 2:
+       human_message = memory_output['chat_history'][-2].content
+       ai_message = memory_output['chat_history'][-1].content
+    
+       chat_list = [{
+            'human': human_message,
+            'ai': ai_message
+        }]
+    else:
+        chat_list = []  # Handle case where there are fewer than two messages
 
     # Debug print the resulting list
-    print("Chat History as List of Key-Value Pairs", chat_list)
-        
+    print("Last Two Chat Messages:", chat_list)
+
     generated_question = question_generator_chain.run({"question": question, "chat_history": chat_list})
     print("\n🔹 Generated Question:")
     print(generated_question)
@@ -97,19 +98,17 @@ def chatbot(question):
     retrieved_docs = retriever.get_relevant_documents(generated_question)
     print("\n🔹 Retrieved Documents:")
     
-    formatted_prompt = prompt_function.format(question=generated_question, context=retrieved_docs['content'])
+    formatted_prompt = prompt_function.format(question=generated_question, context=retrieved_docs)
     response = response_function(formatted_prompt)
 
     
     print("Response:",response)
-    
 
-    #validate response
-    validation_prompt = get_validation_prompt(response, generated_question)
-    validation_result = run_chat_others(validation_prompt)
-    print("Validation result:",validation_result.strip(),"end")
+    # validation_prompt = get_validation_prompt(response, generated_question)
+    # validation_result = run_chat_others(validation_prompt)
+    # print("Validation result:",validation_result.strip(),"end")
     
-    formatting_prompt = get_format_text_prompt(question,validation_result)
+    formatting_prompt = get_format_text_prompt(question,response)
     formatted_result = run_chat_others(formatting_prompt)
     print("Formatted result:",formatted_result.strip())
     
@@ -122,8 +121,8 @@ def chatbot(question):
     # elif enrollment_status == "new user" :
     #     validation_result = validation_result.strip('"') + "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan."
     
-    tone_formatting = get_formatting_prompt(formatted_result)
-    final = run_chat_others(tone_formatting)
+    final_formatted = get_formatting_and_validation_prompt(formatted_result, generated_question)
+    final = run_chat_others(final_formatted)
     print("Final result:",final.strip())
     
     memory.save_context({"input": question},{"output": final})

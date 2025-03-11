@@ -41,22 +41,32 @@ def query_reformulation_prompt():
     query_reformulation_prompt = PromptTemplate(
     input_variables=["chat_history", "question"],
     template="""
-    You are an intelligent assistant that refines user queries to make them clear, coherent, and contextually relevant.
+    You are an intelligent assistant that refines user queries only when necessary to make them clearer and contextually relevant.
     
     **Instructions:**
     - Carefully analyze the previous conversation history.
-    - Understand the intent behind the current query.
-    - Reformulate the query in one sentence to make it more precise, removing ambiguities.
-    - Ensure the reformulated query maintains the original meaning while making it clearer.
-    - Don't generate any additional explanations other than the reformulated query.
-    
+    - Maintain the original wording of the user's query.
+    - Add only a few words if necessary to clarify meaning based on context.
+    - If the original query is already clear, leave it unchanged.
+    - Do not alter the intent or structure of the original question.
+    - Provide only the final query without additional explanations.
+
+    **Examples:**
+    - If the user asks: "How to login?" → Keep it as "How to login?"
+    - If the user asks: "How to reset my password?" → Keep it as "How to reset my password?"
+    - If the latest chat history is: "How to reset my password?" and the next query is: "As an agent?" → Reformulate it as "How to reset my password as an agent?"
+    - If the previous chat history is: "How to reset my password?" and the next query is: "As an  group agent?" → Reformulate it as "How to reset my password as a group agent?"
+    - If the lastest chat history is: "How to login?" and the next query is: "As an agent?" → Reformulate it as "How to login as an agent?"
+    - If the previous chat history is: "How to reset my username?" and the next query is: "As an  agent?" → Reformulate it as "How to reset my username as an agent?"
+    - If the previous chat history is: "How to reset my username?" and the next query is: "what about my password?" → Reformulate it as "How to reset my password?"
+
     **Conversation History:**
     {chat_history}
     
     **User's Current Query:**
     {question}
     
-    **Reformulated Query:**
+    **Final Query:**
     """
 )
     return query_reformulation_prompt
@@ -108,7 +118,7 @@ def get_validation_prompt(response: str, query: str) -> str:
         You are an AI assistant responsible for validating and formatting an insurance response according to the following instructions:
 
         1. If the response is completely irrelevant to the user’s query, return: "I don't have enough information on that. Please contact the office or provide more details."
-
+        2. Strictly don't generate any extra texs.
 
         **User Question:**  
         {question}
@@ -173,10 +183,11 @@ def get_format_text_prompt(query: str, response:str) -> str:
           1. Make the reponse generalized without asumming the user's situation.
           2. If the user asks questions related to plan enrollment, return "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan.".
           3. If question want to report a issue or has a issue return "\nGo to the website https://qa-tickets.purenroll.com/ to report any issue.".
-          4. Remove/Don't include extra text, such as “feel free to ask more questions”.
-          5. Do not request additional information.
-          6. Ensure responses feel natural and directly address the user's query.
-          7. Do not offer explanations or generate additional content. ()
+          4. To login show the user the dashboard link along with original response"\nGo to the website https://qa-dashboard.purenroll.com/ to login to your account.".
+          5. Remove/Don't include extra text, such as “feel free to ask more questions”.
+          6. Do not request additional information.
+          7. Ensure responses feel natural and directly address the user's query.
+          8. Do not offer explanations or generate additional content. ()
           
           **User Query:**  
           {query}
@@ -218,20 +229,22 @@ def get_user_enrollment_status(query: str) -> str:
     formatted_prompt = prompt_template.format(query=query)
     return formatted_prompt
 
-def get_formatting_prompt(response: str) -> str:
+def get_formatting_and_validation_prompt(response: str, query: str) -> str:
     prompt_template = PromptTemplate(
-        input_variables=["response"],
+        input_variables=["response", "query"],
         template=
         """
-        Please revise the response and return a more professional and straignt to the point version. 
-        - Ensure that the text size is normal and consistent.
+        Please revise the response and return a more professional version.
+        - Ensure that the answer is relevant to the question.
+        - Otherwise, generate a more relevant response using the given query and response.
+        - If you don't have enough information return "I don't have enough information on that. Please contact the office or provide more details."
 
-        
-        - Don't generate any additional explanations.
+        - STRICTLY ***Don't generate any additional explanations.***
+
+        {query}
         
         {response}      
         """
     )
-    formatted_prompt = prompt_template.format(response=response)
+    formatted_prompt = prompt_template.format(response=response, query=query)
     return formatted_prompt
-
