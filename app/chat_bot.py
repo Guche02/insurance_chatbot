@@ -58,7 +58,7 @@ def chatbot(question):
         
     question_generator_chain = LLMChain(llm=llm_function, prompt=query_reformulation_prompt())
 
-    retriever = vector_collection.as_retriever()
+    retriever = vector_collection.as_retriever(search_kwargs={"k": 3})
     
     # ConversationalRetrievalChain, combining everything
     chain = ConversationalRetrievalChain(

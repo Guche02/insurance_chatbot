@@ -173,35 +173,53 @@ def get_summarize_prompt(data):
     formatted_prompt = prompt_template
     return formatted_prompt
 
-def get_format_text_prompt(query: str, response:str) -> str:
+def get_format_text_prompt(query: str, response: str) -> str:
     prompt_template = PromptTemplate(
-        input_variables=["query","response"],
+        input_variables=["query", "response"],
         template=
         """
-          - You are an AI responsible for formatting text AI reponses following below guidelines also consider user's question when necessary:
-          
-          1. Make the reponse generalized without asumming the user's situation.
-          2. If the user asks questions related to plan enrollment, return "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan.".
-          3. If question want to report a issue or has a issue return "\nGo to the website https://qa-tickets.purenroll.com/ to report any issue.".
-          4. To login show the user the dashboard link along with original response"\nGo to the website https://qa-dashboard.purenroll.com/ to login to your account.".
-          5. If the user asks for group dashboard return "\nGo to the website https://qa-group-dashboard.purenroll.com/ to login to your group account.".
-          6. If the user asks for employer dashboard return "\nGo to the website https://qa-employer-dashboard.purenroll.com/ to login to your employer account.".
-          7. Remove/Don't include extra text, such as “feel free to ask more questions”.
-          8. Do not request additional information.
-          9. Ensure responses feel natural and directly address the user's query.
-          10. Do not offer explanations or generate additional content. 
-          
-          **User Query:**  
-          {query}
-          
-          **AI Response:**  
-          {response}
+        - You are an AI responsible for formatting text AI responses following the guidelines below. Also, consider the user's question when necessary:
 
+        1. Make the response generalized without assuming the user's situation.  
+        2. If the user asks questions related to plan enrollment, return:  
+           "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan.".  
+        3. If the user wants to report an issue or has an issue, return:  
+           "\nGo to the website https://qa-tickets.purenroll.com/ to report any issue.".  
+        4. Remove/Don't include extra text, such as “feel free to ask more questions.”  
+        5. Do not request additional information.  
+        6. Ensure responses feel natural and directly address the user's query.  
+        7. Do not offer explanations or generate additional content. 
+        8. If the user wants to login or view the dashboard, without specifying the type of user, returns all the dashboard ***links***.
+        9. If the user specifies a particular dashboard or login, return ONLY the relevant dashboard ***links***.
+
+        ***Links***: 
+           - **Member Dashboard**: "\nGo to the website https://qa-dashboard.purenroll.com to log in to your account."  
+           - **Group/Employer Dashboard**: "\nGo to the website https://group.corenroll.com to log in to your account."  
+           - **Representative Dashboard**: "\nGo to the website https://reps.purenroll.com/ to log in to your representative account."  
+
+        ***Examples***:
+
+        - If the user asks: "How do I log in?" Return:  
+          "\nGo to the website https://qa-dashboard.purenroll.com to log in to into your member account."  
+          "\nGo to the website https://group.corenroll.com to log in to your group account."  
+          "\nGo to the website https://reps.purenroll.com/ to log in to your representative account."  
+
+        - If the user asks: "How do I log in as a representative?" Return:  
+          "\nGo to the website https://reps.purenroll.com/ to log in to your representative account."
+
+        - If the user asks: "How do I log in as a group/employer?" Return:  
+          "\nGo to the website https://group.corenroll.com to log in to your group/employer account."
+
+        **User Query:**  
+        {query}  
+
+        **AI Response:**  
+        {response}  
         """
     )
+
     formatted_prompt = prompt_template.format(query=query, response=response)
     return formatted_prompt
-
 
 def get_user_enrollment_status(query: str) -> str:
     prompt_template = PromptTemplate(
@@ -238,6 +256,7 @@ def get_formatting_and_validation_prompt(response: str, query: str) -> str:
         """
         Please revise the response and return a more professional version.
         - Ensure that the answer is relevant to the question.
+        - If the answer is relevant, return the SAME response.
         - Otherwise, generate a more relevant response using the given query and response.
         - If you don't have enough information return "I don't have enough information on that. Please contact the office or provide more details."
 
