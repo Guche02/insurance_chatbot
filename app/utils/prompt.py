@@ -184,10 +184,12 @@ def get_format_text_prompt(query: str, response:str) -> str:
           2. If the user asks questions related to plan enrollment, return "\nGo to the website https://qa-enroll.corenroll.com/ to enroll in a plan.".
           3. If question want to report a issue or has a issue return "\nGo to the website https://qa-tickets.purenroll.com/ to report any issue.".
           4. To login show the user the dashboard link along with original response"\nGo to the website https://qa-dashboard.purenroll.com/ to login to your account.".
-          5. Remove/Don't include extra text, such as “feel free to ask more questions”.
-          6. Do not request additional information.
-          7. Ensure responses feel natural and directly address the user's query.
-          8. Do not offer explanations or generate additional content. ()
+          5. If the user asks for group dashboard return "\nGo to the website https://qa-group-dashboard.purenroll.com/ to login to your group account.".
+          6. If the user asks for employer dashboard return "\nGo to the website https://qa-employer-dashboard.purenroll.com/ to login to your employer account.".
+          7. Remove/Don't include extra text, such as “feel free to ask more questions”.
+          8. Do not request additional information.
+          9. Ensure responses feel natural and directly address the user's query.
+          10. Do not offer explanations or generate additional content. 
           
           **User Query:**  
           {query}

@@ -18,4 +18,3 @@ ENV PYTHONUNBUFFERED=1
 
 # Start Streamlit UI when the container runs
 CMD ["streamlit", "run", "ui.py"]
-
